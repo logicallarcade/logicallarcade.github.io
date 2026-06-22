@@ -61,6 +61,9 @@ const newRecordBanner = document.getElementById('new-record-banner');
 // About Modal Elements
 const aboutModal = document.getElementById('about-modal');
 
+// Game Over Modal Elements
+const gameOverModal = document.getElementById('game-over-modal');
+
 // Modal Display Helpers using tailwind class 'hidden'
 function openModal(modalEl) {
     if (!modalEl) return;
@@ -92,23 +95,6 @@ function closeModal(modalEl) {
 // --- INIT & UTILS ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Load theme from localStorage
-    const savedTheme = localStorage.getItem('logicall_theme') || 'dark';
-    const htmlEl = document.documentElement;
-    const themeIcon = document.getElementById('theme-icon');
-    
-    if (savedTheme === 'light') {
-        htmlEl.classList.remove('dark');
-        if (themeIcon) {
-            themeIcon.className = 'fa-solid fa-moon text-gray-700 text-sm';
-        }
-    } else {
-        htmlEl.classList.add('dark');
-        if (themeIcon) {
-            themeIcon.className = 'fa-solid fa-sun text-gray-400 text-sm';
-        }
-    }
-
     // Initial Setup
     createGridCells();
     updateGlobalBestTimeHeader();
@@ -627,7 +613,7 @@ function selectCell(row, col) {
     // Auto-focus mobile input trigger if editable cell
     const trigger = document.getElementById('mobile-input-trigger');
     if (trigger) {
-        if (initialValues[row][col] === 0) {
+        if (initialValues[row][col] === 0 && !hintBoard[row][col]) {
             const cellIndex = row * 9 + col;
             const cellEl = sudokuGrid.children[cellIndex];
             if (cellEl) {
@@ -716,8 +702,8 @@ function inputNumber(num) {
     
     const { r, c } = selectedCell;
     
-    // Cannot modify initial puzzle numbers
-    if (initialValues[r][c] !== 0) return;
+    // Cannot modify initial puzzle numbers or hints
+    if (initialValues[r][c] !== 0 || hintBoard[r][c]) return;
     
     if (notesModeActive) {
         // Toggle note
@@ -789,7 +775,7 @@ function eraseSelectedCell() {
     if (!isGameActive || !selectedCell) return;
     
     const { r, c } = selectedCell;
-    if (initialValues[r][c] !== 0) return; // cannot erase given values
+    if (initialValues[r][c] !== 0 || hintBoard[r][c]) return; // cannot erase given or hint values
     
     gridValues[r][c] = 0;
     hintBoard[r][c] = false;
@@ -1057,7 +1043,7 @@ function checkWinCondition() {
     return true;
 }
 
-function handleWin() {
+function handleWin(fromPeer = false) {
     pauseTimer();
     isGameActive = false;
     clearGameProgress();
@@ -1085,7 +1071,7 @@ function handleWin() {
     openModal(winModal);
 
     // Sync Win status to peer
-    if (isMultiplayer && activeConnection && activeConnection.open) {
+    if (!fromPeer && isMultiplayer && activeConnection && activeConnection.open) {
         sendToPeer({ type: 'win', secondsElapsed });
     }
 }
@@ -1452,6 +1438,8 @@ function handleIncomingData(data) {
         resetTimer();
         startTimer();
         renderBoard();
+        
+        setConnectionStatus('connected', 'Terhubung (Multiplayer)');
     }
     
     else if (data.type === 'undo-redo') {
@@ -1480,7 +1468,7 @@ function handleIncomingData(data) {
     }
     
     else if (data.type === 'game-over') {
-        handleGameOver();
+        handleGameOver(true);
     }
     
     else if (data.type === 'request-new-game') {
@@ -1491,7 +1479,7 @@ function handleIncomingData(data) {
     
     else if (data.type === 'win') {
         secondsElapsed = data.secondsElapsed;
-        handleWin();
+        handleWin(true);
     }
 }
 
@@ -1632,7 +1620,7 @@ function setupMobileInputTrigger() {
     trigger.addEventListener('input', (e) => {
         if (!selectedCell || !isGameActive) return;
         const { r, c } = selectedCell;
-        if (initialValues[r][c] !== 0) return;
+        if (initialValues[r][c] !== 0 || hintBoard[r][c]) return;
         
         const val = trigger.value;
         if (val === '') {
@@ -1780,32 +1768,36 @@ function updateMistakesUI() {
     }
 }
 
-function handleGameOver() {
-    // 1. Notify peer first
-    if (isMultiplayer && activeConnection && activeConnection.open) {
-        sendToPeer({ type: 'game-over' });
-    }
-    
-    // 2. If multiplayer, clean up session completely
-    if (isMultiplayer) {
-        cleanupMultiplayerSession();
-    }
-    
-    // 3. Reset game state
+function handleGameOver(fromPeer = false) {
+    pauseTimer();
     isGameActive = false;
     clearGameProgress();
     
-    // 4. Return to landing page (menu view)
-    backToMenu();
+    // Open Game Over Modal
+    openModal(gameOverModal);
     
-    // 5. Reset mistakes counter and timer display
-    mistakesCount = 0;
-    updateMistakesUI();
-    resetTimer();
+    // Disable/Enable Coba Lagi button based on multiplayer role
+    const btnRestart = document.getElementById('btn-game-over-restart');
+    if (btnRestart) {
+        if (isMultiplayer && !isHost) {
+            btnRestart.disabled = true;
+            btnRestart.textContent = 'Menunggu Host...';
+            btnRestart.classList.add('opacity-50', 'pointer-events-none');
+        } else {
+            btnRestart.disabled = false;
+            btnRestart.textContent = 'Coba Lagi';
+            btnRestart.classList.remove('opacity-50', 'pointer-events-none');
+        }
+    }
+
+    // Sync Game Over status to peer
+    if (!fromPeer && isMultiplayer && activeConnection && activeConnection.open) {
+        sendToPeer({ type: 'game-over' });
+    }
 }
 
 function hideGameOverModal() {
-    // Game over modal is removed, this function is a placeholder to prevent references from throwing errors
+    closeModal(gameOverModal);
 }
 
 function leaveOrDestroyRoom() {
@@ -1891,25 +1883,5 @@ function triggerHardReload() {
         clearGameProgress();
         localStorage.removeItem('logicall_active_view');
         window.location.href = window.location.origin + window.location.pathname;
-    }
-}
-
-function toggleTheme() {
-    const htmlEl = document.documentElement;
-    const isDark = htmlEl.classList.contains('dark');
-    const themeIcon = document.getElementById('theme-icon');
-    
-    if (isDark) {
-        htmlEl.classList.remove('dark');
-        localStorage.setItem('logicall_theme', 'light');
-        if (themeIcon) {
-            themeIcon.className = 'fa-solid fa-moon text-gray-700 text-sm';
-        }
-    } else {
-        htmlEl.classList.add('dark');
-        localStorage.setItem('logicall_theme', 'dark');
-        if (themeIcon) {
-            themeIcon.className = 'fa-solid fa-sun text-gray-400 text-sm';
-        }
     }
 }
