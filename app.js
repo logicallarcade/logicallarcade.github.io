@@ -92,6 +92,23 @@ function closeModal(modalEl) {
 // --- INIT & UTILS ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('logicall_theme') || 'dark';
+    const htmlEl = document.documentElement;
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (savedTheme === 'light') {
+        htmlEl.classList.remove('dark');
+        if (themeIcon) {
+            themeIcon.className = 'fa-solid fa-moon text-gray-700 text-sm';
+        }
+    } else {
+        htmlEl.classList.add('dark');
+        if (themeIcon) {
+            themeIcon.className = 'fa-solid fa-sun text-gray-400 text-sm';
+        }
+    }
+
     // Initial Setup
     createGridCells();
     updateGlobalBestTimeHeader();
@@ -1874,5 +1891,25 @@ function triggerHardReload() {
         clearGameProgress();
         localStorage.removeItem('logicall_active_view');
         window.location.href = window.location.origin + window.location.pathname;
+    }
+}
+
+function toggleTheme() {
+    const htmlEl = document.documentElement;
+    const isDark = htmlEl.classList.contains('dark');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (isDark) {
+        htmlEl.classList.remove('dark');
+        localStorage.setItem('logicall_theme', 'light');
+        if (themeIcon) {
+            themeIcon.className = 'fa-solid fa-moon text-gray-700 text-sm';
+        }
+    } else {
+        htmlEl.classList.add('dark');
+        localStorage.setItem('logicall_theme', 'dark');
+        if (themeIcon) {
+            themeIcon.className = 'fa-solid fa-sun text-gray-400 text-sm';
+        }
     }
 }

@@ -41,27 +41,27 @@
     <div class="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
 
     <!-- Header Section -->
-    <header class="relative z-10 px-6 py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
+    <header class="relative z-10 px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="backToMenu()">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30">
-                    <i class="fa-solid fa-gamepad text-xl text-white"></i>
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="backToMenu()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30">
+                    <i class="fa-solid fa-gamepad text-base sm:text-xl text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-brandPurple">
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-brandPurple">
                         Logicall
                     </h1>
-                    <p class="text-[10px] tracking-widest text-brandPurple font-semibold uppercase -mt-1">
+                    <p class="text-[8px] sm:text-[10px] tracking-widest text-brandPurple font-semibold uppercase -mt-1">
                         ARCADE PORTAL
                     </p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5 sm:gap-4">
                 <!-- Username Input (Global) -->
-                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
-                    <i class="fa-solid fa-user text-brandPurple text-xs"></i>
-                    <input type="text" id="global-username-input" placeholder="Nama Pemain" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-xs text-white font-semibold focus:outline-none w-20 sm:w-28">
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
+                    <i class="fa-solid fa-user text-brandPurple text-[10px] sm:text-xs"></i>
+                    <input type="text" id="global-username-input" placeholder="Nama" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-[10px] sm:text-xs text-white font-semibold focus:outline-none w-14 sm:w-28">
                 </div>
 
                 <!-- Status Stats -->
@@ -71,13 +71,17 @@
                         <span>Sudoku Record: <strong id="global-best-time" class="text-white">-</strong></span>
                     </div>
                 </div>
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" id="btn-theme-toggle" title="Ubah Tema" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300">
+                    <i class="fa-solid fa-sun text-gray-400 text-sm" id="theme-icon"></i>
+                </button>
                 <!-- Hard Reload Trigger -->
-                <button onclick="triggerHardReload()" title="Reset Total & Refresh" class="w-9 h-9 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 hover:border-rose-500/50 flex items-center justify-center transition-all duration-300">
-                    <i class="fa-solid fa-arrow-rotate-right text-rose-400"></i>
+                <button onclick="triggerHardReload()" title="Reset Total & Refresh" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 hover:border-rose-500/50 flex items-center justify-center transition-all duration-300">
+                    <i class="fa-solid fa-arrow-rotate-right text-rose-400 text-sm"></i>
                 </button>
                 <!-- Mini Info Trigger -->
-                <button onclick="toggleAboutModal()" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300">
-                    <i class="fa-solid fa-circle-info text-gray-400 hover:text-white"></i>
+                <button onclick="toggleAboutModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300">
+                    <i class="fa-solid fa-circle-info text-gray-400 hover:text-white text-sm"></i>
                 </button>
             </div>
         </div>

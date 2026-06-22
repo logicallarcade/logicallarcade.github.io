@@ -20,13 +20,46 @@
     --cell-bg-same-value: rgba(245, 158, 11, 0.2);
     --cell-bg-error: rgba(239, 68, 68, 0.25);
     --cell-text-error: #f87171;
+
+    /* Sudoku Board Border Styles */
+    --board-border-thin: 1px solid rgba(71, 85, 105, 0.3);
+    --board-border-thick: 4px solid #64748b; /* slate-500 for high visibility */
+    --board-border-outer: 6px solid #475569;   /* slate-600 */
+}
+
+:root:not(.dark) {
+    --color-bg-deep: #f8fafc; /* slate-50 */
+    --color-bg-panel: rgba(255, 255, 255, 0.85);
+    --color-border-glow: rgba(139, 92, 246, 0.2);
+    
+    /* Sudoku Board Themes */
+    --cell-bg-default: rgba(255, 255, 255, 0.85);
+    --cell-bg-given: rgba(241, 245, 249, 0.95); /* slate-100 */
+    --cell-text-given: #0f172a; /* slate-900 */
+    --cell-text-user: #2563eb; /* indigo-600 */
+    --cell-text-hint: #059669; /* emerald-600 */
+    
+    --cell-bg-selected: rgba(139, 92, 246, 0.2);
+    --cell-bg-highlight: rgba(99, 102, 241, 0.08);
+    --cell-bg-same-value: rgba(245, 158, 11, 0.15);
+    --cell-bg-error: rgba(239, 68, 68, 0.15);
+    --cell-text-error: #dc2626; /* red-600 */
+
+    /* Sudoku Board Border Styles for Light Mode */
+    --board-border-thin: 1px solid rgba(148, 163, 184, 0.25);
+    --board-border-thick: 4px solid #475569; /* slate-600 */
+    --board-border-outer: 6px solid #1e293b;   /* slate-800 */
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
     font-family: var(--font-body);
     background-color: var(--color-bg-deep);
     color: #f3f4f6;
-    overflow-x: hidden;
     background-image: 
         radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
@@ -106,11 +139,14 @@ h1, h2, h3, h4, h5, h6 {
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
     grid-template-rows: repeat(9, minmax(0, 1fr));
-    border: 3px solid #475569; /* slate-600 */
+    border: var(--board-border-outer);
     border-radius: 0.5rem;
     overflow: hidden;
     background-color: #1e293b; /* slate-800 */
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Styling border thickness for 3x3 blocks */
@@ -123,15 +159,16 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.5rem;
     font-weight: 700;
     background-color: var(--cell-bg-default);
-    border: 1px solid rgba(71, 85, 105, 0.4); /* slate-600 with low opacity */
+    border: var(--board-border-thin);
     cursor: pointer;
     user-select: none;
     transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    box-sizing: border-box;
 }
 
 /* Thicker borders for columns */
 .sudoku-cell:nth-child(3n) {
-    border-right: 2px solid #475569;
+    border-right: var(--board-border-thick);
 }
 .sudoku-cell:nth-child(9n) {
     border-right: none;
@@ -141,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Row 1-9 correspond to cells index range */
 .sudoku-cell:nth-child(n+19):nth-child(-n+27),
 .sudoku-cell:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: 2px solid #475569;
+    border-bottom: var(--board-border-thick);
 }
 
 /* Base cell styling states */
@@ -284,12 +321,134 @@ h1, h2, h3, h4, h5, h6 {
     background: #374151;
 }
 
-/* Responsive Sudoku Board Scale on small phones */
+/* Responsive Sudoku Board Scale on small viewports */
+@media (max-width: 480px) {
+    .sudoku-cell {
+        font-size: 1.25rem;
+    }
+}
 @media (max-width: 380px) {
     .sudoku-cell {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
     }
     .note-cell {
         font-size: 0.55rem;
     }
+}
+@media (max-width: 340px) {
+    .sudoku-cell {
+        font-size: 1.05rem;
+    }
+}
+
+/* --- LIGHT MODE OVERRIDES --- */
+:root:not(.dark) body {
+    color: #334155 !important; /* slate-700 */
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+        linear-gradient(rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.98) 100%) !important;
+}
+
+:root:not(.dark) h1,
+:root:not(.dark) h2,
+:root:not(.dark) h3,
+:root:not(.dark) h4,
+:root:not(.dark) h5,
+:root:not(.dark) h6,
+:root:not(.dark) .text-white {
+    color: #0f172a !important; /* slate-900 */
+}
+
+/* Retain white color on brand background elements and solid text tags */
+:root:not(.dark) button.bg-gradient-to-r,
+:root:not(.dark) button.bg-brandPurple,
+:root:not(.dark) button.bg-brandIndigo,
+:root:not(.dark) .bg-gradient-to-tr .text-white,
+:root:not(.dark) .bg-gradient-to-tr i,
+:root:not(.dark) .bg-gradient-to-r .text-white,
+:root:not(.dark) .bg-emerald-500 .text-white,
+:root:not(.dark) .bg-rose-500 .text-white,
+:root:not(.dark) .bg-rose-600 .text-white,
+:root:not(.dark) button.bg-gradient-to-r *,
+:root:not(.dark) #player-role-badge,
+:root:not(.dark) .btn-primary-text {
+    color: #ffffff !important;
+}
+
+/* Secondary gray texts override */
+:root:not(.dark) .text-gray-400 {
+    color: #64748b !important; /* slate-500 */
+}
+:root:not(.dark) .text-gray-300 {
+    color: #475569 !important; /* slate-600 */
+}
+:root:not(.dark) .text-gray-200 {
+    color: #1e293b !important; /* slate-800 */
+}
+
+/* Glass panel in light mode */
+:root:not(.dark) .glass-panel {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04) !important;
+}
+:root:not(.dark) header.glass-panel {
+    background-color: rgba(255, 255, 255, 0.75) !important;
+}
+:root:not(.dark) footer.glass-panel {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Inputs, dropdowns, and default buttons */
+:root:not(.dark) input[type="text"],
+:root:not(.dark) select,
+:root:not(.dark) button:not(.bg-gradient-to-r):not(.bg-rose-600):not(.bg-brandPurple) {
+    background-color: #f1f5f9 !important; /* slate-100 */
+    border-color: #cbd5e1 !important; /* slate-300 */
+    color: #1e293b !important; /* slate-800 */
+}
+:root:not(.dark) button:not(.bg-gradient-to-r):not(.bg-rose-600):not(.bg-brandPurple):hover {
+    background-color: #e2e8f0 !important; /* slate-200 */
+}
+
+/* Friv cards light mode styling */
+:root:not(.dark) .friv-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+}
+:root:not(.dark) .friv-card:hover {
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.08) !important;
+}
+
+/* Coop panel backgrounds */
+:root:not(.dark) .bg-gray-800\/40,
+:root:not(.dark) .bg-gray-900\/40,
+:root:not(.dark) .bg-slate-800\/90,
+:root:not(.dark) .bg-gray-800\/80,
+:root:not(.dark) .bg-gray-800\/70,
+:root:not(.dark) .bg-slate-900\/60,
+:root:not(.dark) #player-list-area {
+    background-color: rgba(241, 245, 249, 0.75) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+/* Global grid background line color */
+:root:not(.dark) .fixed.inset-0.pointer-events-none {
+    background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px) !important;
+}
+
+/* Custom Scrollbar in light mode */
+:root:not(.dark) ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+:root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
