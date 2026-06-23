@@ -114,6 +114,29 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Pulsing highlight for Bingo */
+.bingo-promo-card {
+    border-color: rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.25);
+    animation: pulseBingoBorder 3s infinite alternate;
+}
+
+.bingo-promo-card:hover {
+    border-color: rgba(6, 182, 212, 0.8);
+    box-shadow: 0 0 35px rgba(6, 182, 212, 0.45);
+}
+
+@keyframes pulseBingoBorder {
+    0% {
+        border-color: rgba(6, 182, 212, 0.4);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+    }
+    100% {
+        border-color: rgba(34, 211, 238, 0.8);
+        box-shadow: 0 0 35px rgba(34, 211, 238, 0.4);
+    }
+}
+
 /* Glassmorphism containers */
 .glass-panel {
     background: var(--color-bg-panel);
@@ -168,6 +191,11 @@ h1, h2, h3, h4, h5, h6 {
     background: rgba(139, 92, 246, 0.1);
     border-color: rgba(139, 92, 246, 0.3);
     color: #a78bfa;
+}
+.lobby-badge--bingo {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: rgba(6, 182, 212, 0.3);
+    color: #22d3ee;
 }
 
 /* Player count */

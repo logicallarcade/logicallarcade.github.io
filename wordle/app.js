@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
         myUsername = 'User_' + Math.floor(100 + Math.random() * 900);
         localStorage.setItem('logicall_username', myUsername);
     }
-    document.getElementById('player-username').textContent = myUsername;
+    const globalUsernameInput = document.getElementById('global-username-input');
+    if (globalUsernameInput) {
+        globalUsernameInput.value = myUsername;
+    }
 
     // Load stats
     loadStatsFromStorage();
@@ -699,6 +702,12 @@ async function createVersusRoom() {
     isMultiplayer = true;
     isHost = true;
     roomCode = generateRoomCode();
+
+    const btnCreate = document.getElementById('btn-create-room');
+    if (btnCreate) {
+        btnCreate.disabled = true;
+        btnCreate.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Buat Room...';
+    }
     
     // Reset state & UI
     document.getElementById('player-role-badge').textContent = "HOST";
@@ -706,7 +715,10 @@ async function createVersusRoom() {
     document.getElementById('connection-status-text').textContent = `Host: Room ${roomCode}`;
     document.getElementById('connection-status-dot').className = "w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse";
     
-    document.getElementById('room-code-display').textContent = roomCode;
+    const linkInput = document.getElementById('share-link-input');
+    if (linkInput) {
+        linkInput.value = roomCode;
+    }
     document.getElementById('btn-create-room').classList.add('hidden');
     document.getElementById('join-room-area').classList.add('hidden');
     document.getElementById('room-info-area').classList.remove('hidden');
@@ -719,7 +731,7 @@ async function createVersusRoom() {
         shareBtn.classList.remove('hidden');
         shareBtn.disabled = false;
         shareBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby';
-        shareBtn.className = "px-3 py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1";
+        shareBtn.className = "px-3 py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1 flex-1";
     }
     
     // Show opponent board
@@ -735,15 +747,39 @@ async function createVersusRoom() {
 }
 
 async function joinVersusRoomByCode() {
-    const input = document.getElementById('room-code-input').value.trim().toUpperCase();
-    if (!input || input.length < 5) {
+    let inputVal = document.getElementById('room-code-input').value.trim();
+    if (inputVal.includes('?')) {
+        try {
+            const urlParams = new URLSearchParams(inputVal.split('?')[1]);
+            const roomFromUrl = urlParams.get('room');
+            if (roomFromUrl) {
+                inputVal = roomFromUrl;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    } else if (inputVal.includes('/')) {
+        const parts = inputVal.split('/');
+        const lastPart = parts[parts.length - 1];
+        if (lastPart && lastPart.length >= 5) {
+            inputVal = lastPart;
+        }
+    }
+    const sanitized = inputVal.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (!sanitized || sanitized.length < 5) {
         showToast("Kode room tidak valid!");
         return;
+    }
+
+    const btnJoin = document.getElementById('btn-join-room');
+    if (btnJoin) {
+        btnJoin.disabled = true;
+        btnJoin.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
     }
     
     isMultiplayer = true;
     isHost = false;
-    roomCode = input;
+    roomCode = sanitized;
     
     // Set temporary connection status, do not transition full UI yet
     document.getElementById('connection-status-text').textContent = "Menghubungkan...";
@@ -758,7 +794,10 @@ function transitionUIForGuest() {
     document.getElementById('connection-status-text').textContent = `Tamu: Room ${roomCode}`;
     document.getElementById('connection-status-dot').className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
     
-    document.getElementById('room-code-display').textContent = roomCode;
+    const linkInput = document.getElementById('share-link-input');
+    if (linkInput) {
+        linkInput.value = roomCode;
+    }
     document.getElementById('btn-create-room').classList.add('hidden');
     document.getElementById('join-room-area').classList.add('hidden');
     document.getElementById('room-info-area').classList.remove('hidden');
@@ -766,7 +805,6 @@ function transitionUIForGuest() {
     if (shareBtn) {
         shareBtn.classList.add('hidden');
     }
-    document.getElementById('btn-copy-code').classList.remove('hidden');
     document.getElementById('btn-start-versus').classList.add('hidden'); // Guest can't start
     document.getElementById('player-list-area').classList.remove('hidden');
     
@@ -806,9 +844,24 @@ function leaveVersusRoom(quiet = false) {
     document.getElementById('btn-create-room').classList.remove('hidden');
     document.getElementById('join-room-area').classList.remove('hidden');
     document.getElementById('room-info-area').classList.add('hidden');
+
+    const btnCreate = document.getElementById('btn-create-room');
+    if (btnCreate) {
+        btnCreate.disabled = false;
+        btnCreate.innerHTML = '<i class="fa-solid fa-users text-emerald-400"></i> Buat Room';
+    }
+    const btnJoin = document.getElementById('btn-join-room');
+    if (btnJoin) {
+        btnJoin.disabled = false;
+        btnJoin.textContent = 'Gabung';
+    }
     const shareBtn = document.getElementById('btn-share-lobby');
     if (shareBtn) {
         shareBtn.classList.add('hidden');
+    }
+    const linkInput = document.getElementById('share-link-input');
+    if (linkInput) {
+        linkInput.value = "";
     }
     document.getElementById('player-list-area').classList.add('hidden');
     document.getElementById('room-code-input').value = "";
@@ -842,12 +895,47 @@ function generateRoomCode() {
     return code;
 }
 
-function copyRoomCode() {
-    navigator.clipboard.writeText(roomCode).then(() => {
-        showToast("Kode Room disalin!");
-    }).catch(err => {
-        console.error("Gagal menyalin kode", err);
-    });
+function copyShareLink() {
+    const input = document.getElementById('share-link-input');
+    if (input) {
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast("Link undangan disalin!");
+            const btn = document.getElementById('btn-copy-link');
+            if (btn) {
+                btn.textContent = 'Tersalin!';
+                btn.className = "px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95";
+                setTimeout(() => {
+                    btn.textContent = 'Salin';
+                    btn.className = "px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95";
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error("Gagal menyalin link undangan", err);
+        });
+    }
+}
+
+async function changeUsername(val) {
+    const sanitized = val.trim();
+    if (!sanitized) return;
+    myUsername = sanitized;
+    localStorage.setItem('logicall_username', myUsername);
+    
+    if (isMultiplayer && roomChannel) {
+        await roomChannel.track({
+            username: myUsername,
+            role: isHost ? 'host' : 'guest',
+            clientId: myClientId,
+            onlineAt: new Date().toISOString()
+        });
+    }
+}
+
+function backToMenu() {
+    if (isMultiplayer) {
+        leaveVersusRoom(true);
+    }
+    window.location.href = '../';
 }
 
 function setupSupabaseVersus() {
@@ -1047,26 +1135,58 @@ function handlePresenceSync(presenceState) {
     // Update active players list UI
     const container = document.getElementById('player-list-container');
     if (container) {
+        container.className = "flex flex-col gap-1.5 w-full";
         container.innerHTML = activePlayers.map(p => {
             const isMe = p.clientId === myClientId;
-            let roleBadge = p.role === 'host' ? '<span class="px-1 bg-emerald-500/20 text-emerald-400 rounded text-[8px]">HOST</span>' : '<span class="px-1 bg-amber-500/20 text-amber-400 rounded text-[8px]">TAMU</span>';
+            const isHostPlayer = p.role === 'host';
             
-            if (isHost && !isMe && p.role === 'guest') {
-                roleBadge += `
-                    <button onclick="kickGuest('${p.clientId}', '${p.username}')" class="ml-1 px-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/20 rounded text-[8px] font-bold transition">
-                        Kick
-                    </button>
-                `;
+            let roleBadgeHtml = '';
+            if (isMe) {
+                roleBadgeHtml = `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${isHostPlayer ? 'Host' : 'Tamu'}</span>`;
+            } else {
+                if (isHost) {
+                    roleBadgeHtml = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">Tamu</span>
+                            <button onclick="kickGuest('${p.clientId}', '${escapeHTML(p.username)}')" class="px-2 py-0.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[9px] font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-user-minus"></i> Kick
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    roleBadgeHtml = `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">${isHostPlayer ? 'Host' : 'Tamu'}</span>`;
+                }
             }
-
+            
             return `
-                <div class="flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full ${isMe ? 'bg-emerald-500' : 'bg-blue-400'}"></span>
-                    <span class="font-bold ${isMe ? 'text-emerald-400' : 'text-gray-300'}">${p.username}</span>
-                    ${roleBadge}
+                <div class="w-full flex items-center justify-between bg-slate-900/60 p-2 rounded-lg border border-gray-800/80">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full ${isMe ? 'bg-emerald-500' : 'bg-blue-400'} animate-pulse"></span>
+                        <strong>${escapeHTML(p.username)}</strong> ${isMe ? '<span class="text-[9px] text-gray-500 font-bold">(Anda)</span>' : ''}
+                    </span>
+                    ${roleBadgeHtml}
                 </div>
             `;
-        }).join('<span class="text-gray-700">|</span>');
+        }).join('');
+    }
+
+    // Update player list header count dynamically
+    const playerListArea = document.getElementById('player-list-area');
+    if (playerListArea) {
+        const titleEl = playerListArea.querySelector('span');
+        if (titleEl) {
+            titleEl.textContent = `Daftar Pemain (${activePlayers.length}/2 - Min: 2)`;
+        }
+    }
+
+    // Update leave room button text dynamically
+    const btnLeave = document.getElementById('btn-leave-room');
+    if (btnLeave) {
+        if (isHost) {
+            btnLeave.innerHTML = '<i class="fa-solid fa-rectangle-xmark"></i> Tutup Room';
+        } else {
+            btnLeave.innerHTML = '<i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Room';
+        }
     }
 
     // Enable/disable start button for Host based on guest presence
@@ -1075,6 +1195,8 @@ function handlePresenceSync(presenceState) {
         if (startBtn) {
             if (opponentFound) {
                 startBtn.classList.remove('hidden');
+                startBtn.disabled = false;
+                startBtn.textContent = "Mulai Game";
             } else {
                 startBtn.classList.add('hidden');
             }
@@ -1084,6 +1206,12 @@ function handlePresenceSync(presenceState) {
 
 async function startVersusGame() {
     if (!isHost || !roomChannel) return;
+    
+    const startBtn = document.getElementById('btn-start-versus');
+    if (startBtn) {
+        startBtn.disabled = true;
+        startBtn.textContent = "Memulai...";
+    }
     
     showToast("Memulai game...");
     
@@ -1460,4 +1588,11 @@ function toggleOpponentBoardMobile() {
         toggleBtn.classList.remove('text-emerald-400');
         toggleBtn.classList.add('text-gray-400');
     }
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g,
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
 }

@@ -418,6 +418,12 @@ function initNewGame() {
         return;
     }
 
+    const btnNewGame = document.getElementById('btn-new-game');
+    if (btnNewGame) {
+        btnNewGame.disabled = true;
+        btnNewGame.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Game Baru';
+    }
+
     hideAllGameModals();
     isGameActive = true;
     gameDifficulty = difficultySelect.value;
@@ -476,6 +482,11 @@ function initNewGame() {
             solutionValues,
             gameDifficulty
         });
+    }
+
+    if (btnNewGame) {
+        btnNewGame.disabled = false;
+        btnNewGame.innerHTML = '<i class="fa-solid fa-plus"></i> Game Baru';
     }
 }
 
@@ -1942,8 +1953,26 @@ function generateShortCode() {
 function joinRoomByCode() {
     const input = document.getElementById('room-code-input');
     if (!input) return;
-    const code = input.value.trim().toUpperCase();
-    if (!code) {
+    let inputVal = input.value.trim();
+    if (inputVal.includes('?')) {
+        try {
+            const urlParams = new URLSearchParams(inputVal.split('?')[1]);
+            const roomFromUrl = urlParams.get('room');
+            if (roomFromUrl) {
+                inputVal = roomFromUrl;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    } else if (inputVal.includes('/')) {
+        const parts = inputVal.split('/');
+        const lastPart = parts[parts.length - 1];
+        if (lastPart && lastPart.length >= 5) {
+            inputVal = lastPart;
+        }
+    }
+    const sanitized = inputVal.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (!sanitized) {
         Swal.fire({
             background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
             title: 'Kode Kosong', html: 'Harap masukkan kode room terlebih dahulu!',
@@ -1951,7 +1980,7 @@ function joinRoomByCode() {
         });
         return;
     }
-    if (code.length !== 6) {
+    if (sanitized.length !== 6) {
         Swal.fire({
             background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
             title: 'Kode Tidak Valid', html: 'Kode room harus terdiri dari <b>6 karakter</b>!',
@@ -1959,7 +1988,14 @@ function joinRoomByCode() {
         });
         return;
     }
-    const hostId = 'logicall-' + code;
+
+    const btnJoin = document.getElementById('btn-join-room');
+    if (btnJoin) {
+        btnJoin.disabled = true;
+        btnJoin.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i>';
+    }
+
+    const hostId = 'logicall-' + sanitized;
     connectToMultiplayerRoom(hostId);
 }
 
@@ -2066,6 +2102,12 @@ function cleanupMultiplayerSession() {
     }
     document.getElementById('join-room-area').classList.remove('hidden');
     document.getElementById('room-info-area').classList.add('hidden');
+    
+    const btnJoin = document.getElementById('btn-join-room');
+    if (btnJoin) {
+        btnJoin.disabled = false;
+        btnJoin.textContent = 'Gabung';
+    }
     
     // Show co-op settings area again
     const coopSettings = document.getElementById('coop-settings-area');

@@ -191,22 +191,26 @@ function renderLobby(presenceState) {
             </div>`;
     } else {
         container.innerHTML = activeRooms.map(room => {
-            const isWordle = room.game.toLowerCase() === 'wordle';
-            const gameLabel = isWordle ? 'Wordle' : 'Sudoku';
-            const gameIcon = isWordle ? 'fa-font' : 'fa-grid-3x3';
-            const iconBg = isWordle ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-brandPurple/30 bg-brandPurple/10';
-            const iconColor = isWordle ? 'text-emerald-400' : 'text-brandPurple';
-            const badgeClass = isWordle
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-brandPurple/10 border-brandPurple/30 text-brandPurple';
+            const gameKey = room.game.toLowerCase();
+            const isWordle = gameKey === 'wordle';
+            const isSudoku = gameKey === 'sudoku';
+            const isBingo = gameKey === 'bingo';
 
-            const maxPlayers = room.maxPlayers || (isWordle ? 2 : 5);
+            const gameLabel = isWordle ? 'Wordle' : (isSudoku ? 'Sudoku' : 'Bingo');
+            const gameIconHtml = isWordle 
+                ? '<i class="fa-solid fa-font"></i>' 
+                : (isSudoku ? '<span class="font-black font-mono tracking-tighter text-[10px] mr-1">123</span>' : '<i class="fa-solid fa-circle-dot"></i>');
+            const iconBg = isWordle ? 'border-emerald-500/30 bg-emerald-500/10' : (isSudoku ? 'border-brandPurple/30 bg-brandPurple/10' : 'border-cyan-500/30 bg-cyan-500/10');
+            const iconColor = isWordle ? 'text-emerald-400' : (isSudoku ? 'text-brandPurple' : 'text-cyan-400');
+            const badgeClass = isWordle
+                ? 'lobby-badge--wordle'
+                : (isSudoku ? 'lobby-badge--sudoku' : 'lobby-badge--bingo');
+
+            const maxPlayers = room.maxPlayers || (isWordle ? 2 : (isSudoku ? 5 : 8));
             const currentCount = room.playerCount || 1;
             const isFull = currentCount >= maxPlayers;
 
-            const joinUrl = isWordle
-                ? `./wordle/?room=${encodeURIComponent(room.roomCode)}`
-                : `./sudoku/?room=${encodeURIComponent(room.roomCode)}`;
+            const joinUrl = `./${gameKey}/?room=${encodeURIComponent(room.roomCode)}`;
 
             const btnClass = isFull
                 ? 'px-3 py-1.5 rounded-lg bg-gray-800 text-gray-500 border border-gray-700/30 cursor-not-allowed text-[10px] font-bold flex-shrink-0'
@@ -217,8 +221,8 @@ function renderLobby(presenceState) {
                 <div class="lobby-room-card">
                     <!-- Header: game badge + player count -->
                     <div class="flex items-center justify-between mb-2">
-                        <span class="lobby-badge ${isWordle ? 'lobby-badge--wordle' : 'lobby-badge--sudoku'}">
-                            <i class="fa-solid ${gameIcon}"></i> ${gameLabel}
+                        <span class="lobby-badge ${badgeClass}">
+                            ${gameIconHtml} ${gameLabel}
                         </span>
                         <span class="lobby-players ${isFull ? 'lobby-players--full' : 'lobby-players--open'}">
                             <span class="lobby-dot ${isFull ? 'lobby-dot--full' : 'lobby-dot--open'}"></span>

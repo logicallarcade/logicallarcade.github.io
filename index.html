@@ -96,45 +96,47 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4 w-full grid-flow-row-dense">
 
                     <!-- WORDLE (ACTIVE) -->
-                    <div class="friv-card wordle-promo-card aspect-square flex flex-col justify-between p-4 group" onclick="window.location.href='./wordle/'">
-                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all">
+                    <div class="friv-card wordle-promo-card aspect-square flex flex-col justify-between p-4 group relative overflow-hidden" onclick="window.location.href='./wordle/'">
+                        <div class="absolute top-2 left-[-28px] bg-emerald-600/90 text-white text-[7px] font-black uppercase tracking-widest py-0.5 px-8 -rotate-45 z-20 shadow-sm select-none">Logicall</div>
+                        <img src="assets/wordle_thumbnail.png" alt="Wordle" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none z-0">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all z-10 relative self-end">
                             <i class="fa-solid fa-font text-emerald-400 text-lg"></i>
                         </div>
-                        <div>
-                            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-widest block w-max mb-1">Main</span>
+                        <div class="z-10 relative">
+                            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-widest block w-max mb-1">Game Populer</span>
                             <h3 class="font-bold text-base text-white group-hover:text-emerald-400 transition-colors">Wordle</h3>
-                            <p class="text-xs text-gray-400 font-medium">Tebak Kata</p>
+                            <p class="text-xs text-gray-400 font-medium">Tebak Kata (Bahasa Indonesia)</p>
                         </div>
                     </div>
 
                     <!-- SUDOKU PRO (ACTIVE - 2×2) -->
                     <div class="friv-card col-span-2 row-span-2 p-5 flex flex-col justify-between group sudoku-promo-card relative overflow-hidden" onclick="window.location.href='./sudoku/'">
-                        <div class="absolute right-[-10px] top-[-10px] opacity-10 w-36 h-36 grid grid-cols-3 gap-0.5 pointer-events-none transform rotate-12 transition-transform duration-700 group-hover:rotate-[24deg] group-hover:scale-110">
-                            <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
-                            <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
-                            <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
-                        </div>
-                        <div class="flex items-start justify-between relative z-10">
+                        <div class="absolute top-2 left-[-28px] bg-brandPurple/90 text-white text-[7px] font-black uppercase tracking-widest py-0.5 px-8 -rotate-45 z-20 shadow-sm select-none">Logicall</div>
+                        <img src="assets/sudoku_thumbnail.png" alt="Sudoku" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none z-0">
+                        <div class="flex items-start justify-between relative z-10 w-full">
+                            <span class="bg-brandPurple/20 text-brandPurple border border-brandPurple/30 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse ml-8 mt-1">Main Sekarang</span>
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30 border border-brandPurple/50">
-                                <i class="fa-solid fa-grid-3x3 text-white text-2xl"></i>
+                                <span class="text-white text-xl font-black font-mono tracking-tighter select-none">123</span>
                             </div>
-                            <span class="bg-brandPurple/20 text-brandPurple border border-brandPurple/30 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-widest animate-pulse">Main Sekarang</span>
                         </div>
                         <div class="mt-4 z-10 relative">
-                            <span class="text-xs text-brandIndigo font-bold tracking-wider uppercase block mb-1">Game Utama</span>
+                            <span class="text-xs text-brandIndigo font-bold tracking-wider uppercase block mb-1">Game Populer</span>
                             <h3 class="text-xl md:text-2xl font-black text-white tracking-tight group-hover:text-brandPurple transition-colors duration-300">SUDOKU PRO</h3>
-                            <p class="hidden sm:block text-xs text-gray-400 mt-1.5 leading-relaxed">Multiplayer co-op hingga 5 pemain. Notes, Hint, Undo/Redo.</p>
+                            <p class="hidden sm:block text-xs text-gray-400 mt-1.5 leading-relaxed">Multiplayer co-op hingga 5 pemain. Notes, Hint.</p>
                         </div>
                     </div>
 
-                    <!-- Tic Tac Toe (Coming Soon) -->
-                    <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Tic Tac Toe')">
-                        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-all">
-                            <i class="fa-solid fa-xmark text-cyan-400 text-xl"></i>
+                    <!-- BINGO (ACTIVE) -->
+                    <div class="friv-card bingo-promo-card aspect-square flex flex-col justify-between p-4 group relative overflow-hidden" onclick="window.location.href='./bingo/'">
+                        <div class="absolute top-2 left-[-28px] bg-cyan-600/90 text-white text-[7px] font-black uppercase tracking-widest py-0.5 px-8 -rotate-45 z-20 shadow-sm select-none">Logicall</div>
+                        <img src="assets/bingo_thumbnail.png" alt="Bingo" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none z-0">
+                        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-all z-10 relative self-end">
+                            <i class="fa-solid fa-circle-dot text-cyan-400 text-lg animate-pulse"></i>
                         </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-white">Tic Tac Toe</h3>
-                            <p class="text-xs text-cyan-400/80 font-medium">Asah Taktik</p>
+                        <div class="z-10 relative">
+                            <span class="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-widest block w-max mb-1">Game Populer</span>
+                            <h3 class="font-bold text-base text-white group-hover:text-cyan-400 transition-colors">Bingo Royale</h3>
+                            <p class="text-xs text-gray-400 font-medium">Solo &amp; Multiplayer (2-8 Pemain)</p>
                         </div>
                     </div>
 

@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=1.4.0">
+    <link rel="stylesheet" href="style.css?v=1.6.1">
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -50,100 +50,134 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- Header Section -->
-    <header class="relative z-10 px-3 sm:px-6 py-3 border-b border-gray-800/80 glass-panel bg-gray-900/40">
+    <header class="relative z-10 px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="../" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-800/80 border border-gray-700 hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5 shadow-md">
-                    <i class="fa-solid fa-arrow-left"></i> Portal
-                </a>
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="backToMenu()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-600/30">
+                    <i class="fa-solid fa-gamepad text-base sm:text-xl text-white"></i>
+                </div>
                 <div>
-                    <h1 class="text-base sm:text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-200 to-emerald-500">
-                        WORDLE INDONESIA
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-200 to-emerald-400">
+                        Logicall
                     </h1>
+                    <p class="text-[8px] sm:text-[10px] tracking-widest text-emerald-400 font-semibold uppercase -mt-1">
+                        ARCADE PORTAL
+                    </p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-1.5 sm:gap-3">
-                <!-- Username Input Display -->
-                <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-800/40 border border-gray-700/30">
-                    <i class="fa-solid fa-user text-emerald-400 text-xs"></i>
-                    <span id="player-username" class="text-xs text-white font-bold">-</span>
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                <!-- Username Input (Global) -->
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
+                    <i class="fa-solid fa-user text-emerald-400 text-[10px] sm:text-xs"></i>
+                    <input type="text" id="global-username-input" placeholder="Nama" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-[10px] sm:text-xs text-white font-semibold focus:outline-none w-14 sm:w-28">
                 </div>
-                <!-- Connection Badge -->
-                <div id="connection-status-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-800/80 border border-gray-700/60 text-[10px] font-bold text-gray-400">
-                    <span id="connection-status-dot" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                    <span id="connection-status-text">Mode Solo</span>
-                </div>
-                <!-- Restart/New Game -->
-                <button onclick="confirmRestartGame()" title="Ulangi Permainan Baru" class="w-8 h-8 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/40 flex items-center justify-center transition-all duration-300">
-                    <i class="fa-solid fa-arrow-rotate-right text-emerald-400 text-xs"></i>
-                </button>
-                <!-- Stats Trigger -->
-                <button onclick="toggleStatsModal(true)" title="Statistik Saya" class="w-8 h-8 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300">
-                    <i class="fa-solid fa-chart-simple text-gray-400 hover:text-white text-xs"></i>
-                </button>
-                <!-- Help Trigger -->
-                <button onclick="toggleHelpModal(true)" title="Cara Bermain" class="w-8 h-8 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300">
-                    <i class="fa-solid fa-question text-gray-400 hover:text-white text-xs"></i>
+
+                <!-- Refresh / Reload Page -->
+                <button onclick="window.location.reload(true)" title="Refresh Halaman" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-300 group">
+                    <i class="fa-solid fa-arrows-rotate text-emerald-400 text-sm group-hover:rotate-180 transition-transform duration-500"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Multiplayer Room Control Panel -->
-    <section class="relative z-10 max-w-lg w-full mx-auto px-4 mt-4">
+    <!-- Game Header Bar Controls (Aligned with Sudoku gameplay section header) -->
+    <section class="relative z-10 max-w-2xl w-full mx-auto px-4 mt-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+            <div class="flex items-center gap-3">
+                <button onclick="backToMenu()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-gray-800/80 border border-gray-700 hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                </button>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        Wordle Indonesia
+                    </h2>
+                    <p class="text-xs text-gray-400">Tebak kata rahasia Bahasa Indonesia</p>
+                </div>
+            </div>
+
+            <!-- Stats/Badges inline to match Sudoku styling -->
+            <div class="flex items-center justify-between sm:justify-end gap-2.5 text-xs">
+                <!-- Connection Status Badge -->
+                <div id="connection-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-400 shadow-inner h-[38px]">
+                    <span id="connection-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span id="connection-status-text">Mode Solo</span>
+                </div>
+                <!-- Restart button -->
+                <button onclick="confirmRestartGame()" title="Ulangi Permainan Baru" class="w-9 h-9 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/40 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-arrow-rotate-right text-emerald-400 text-sm"></i>
+                </button>
+                <!-- Stats Trigger -->
+                <button onclick="toggleStatsModal(true)" title="Statistik Saya" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-chart-simple text-gray-400 hover:text-white text-sm"></i>
+                </button>
+                <!-- Help/About button -->
+                <button onclick="toggleHelpModal(true)" title="Cara Bermain" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-circle-info text-gray-400 hover:text-white text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multiplayer & Room Setup Panel (Lobi Versus Royale) -->
+    <section class="relative z-10 max-w-2xl w-full mx-auto px-4 mt-4">
         <div class="glass-panel rounded-2xl p-4 border border-gray-800/80 flex flex-col gap-3">
-            <div class="flex justify-between items-center">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Multiplayer Versus</span>
+            <div class="flex justify-between items-center pb-2 border-b border-gray-800/50">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    Lobi Wordle Versus
+                </span>
                 <span id="player-role-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">HOST</span>
             </div>
             
-            <div class="flex flex-col sm:flex-row gap-2.5 justify-between items-stretch sm:items-center" id="multiplayer-controls">
-                <!-- Host/Create button -->
-                <button onclick="createVersusRoom()" id="btn-create-room" class="flex-1 py-2 px-3 text-xs font-bold bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 text-white rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow">
-                    <i class="fa-solid fa-users text-emerald-400"></i> Buat Room Versus
-                </button>
-                
-                <!-- Join input & button -->
-                <div id="join-room-area" class="flex-1 flex gap-2 items-center">
-                    <input type="text" id="room-code-input" placeholder="Kode Room" class="flex-1 w-full bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none transition font-semibold">
-                    <button onclick="joinVersusRoomByCode()" id="btn-join-room" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition active:scale-95">Gabung</button>
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-2.5 justify-between items-stretch" id="multiplayer-controls">
+                    <!-- Host/Create button -->
+                    <button onclick="createVersusRoom()" id="btn-create-room" class="w-full py-2.5 text-xs font-bold bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 text-white rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow">
+                        <i class="fa-solid fa-users text-emerald-400"></i> Buat Room
+                    </button>
+                    
+                    <!-- Join input & button -->
+                    <div id="join-room-area" class="flex flex-col gap-1">
+                        <label for="room-code-input" class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Gabung Room Lain</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="room-code-input" placeholder="Masukkan Kode Room" class="flex-1 bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none transition font-semibold">
+                            <button onclick="joinVersusRoomByCode()" id="btn-join-room" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition active:scale-95">Gabung</button>
+                        </div>
+                    </div>
+
+                    <!-- Info area when room is open (Host / Guest) -->
+                    <div id="room-info-area" class="hidden flex flex-col gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-gray-800">
+                        <p id="room-info-label" class="text-[10px] text-gray-400 leading-tight">Kode Room Anda:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="share-link-input" readonly class="flex-1 bg-slate-950 border border-gray-800 text-[10px] rounded px-2 py-1 text-gray-300 font-bold focus:outline-none select-all text-center">
+                            <button onclick="copyShareLink()" id="btn-copy-link" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95">Salin</button>
+                        </div>
+                        <div class="flex gap-2 mt-1">
+                            <!-- Share Room to Lobby -->
+                            <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="hidden flex-1 py-2 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby
+                            </button>
+                            <!-- Start Game Button (Host only) -->
+                            <button onclick="startVersusGame()" id="btn-start-versus" class="hidden flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95">
+                                Mulai Game
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Info area when room is open -->
-                <div id="room-info-area" class="hidden flex-1 flex flex-row gap-3 items-center bg-slate-900/60 p-2.5 rounded-lg border border-gray-800 w-full justify-between">
-                    <div class="flex flex-col items-start gap-0.5">
-                        <span class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Kode Room</span>
-                        <span id="room-code-display" class="text-sm text-emerald-400 font-black tracking-widest">-</span>
+                <!-- Active Players List Area -->
+                <div id="player-list-area" class="hidden flex flex-col gap-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-gray-800">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Daftar Pemain</span>
+                    <div class="flex flex-col gap-1 text-[11px] text-gray-300 font-medium mb-1.5" id="player-list-container">
+                        <!-- JS will dynamically populate players list -->
                     </div>
-                    <div class="flex gap-2">
-                        <!-- Share Room to Lobby -->
-                        <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="hidden px-3 py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby
-                        </button>
-                        <button onclick="copyRoomCode()" id="btn-copy-code" class="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-600/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-copy"></i> Salin
-                        </button>
-                        <!-- Start Game Button (Host only) -->
-                        <button onclick="startVersusGame()" id="btn-start-versus" class="hidden px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95">
-                            Mulai Game
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Players List -->
-            <div id="player-list-area" class="hidden flex flex-col gap-2 bg-slate-950/40 p-2 py-1.5 rounded-lg border border-gray-900 text-[10px] text-gray-400 font-semibold">
-                <div class="flex items-center justify-between w-full">
-                    <div class="flex items-center gap-2" id="player-list-container">
-                        <!-- Dynamic player names -->
-                    </div>
-                    <button onclick="leaveVersusRoom()" class="text-rose-400 hover:text-rose-300 font-bold text-[10px] transition uppercase flex items-center gap-1">
+                    <button onclick="leaveVersusRoom()" id="btn-leave-room" class="w-full py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Room
                     </button>
                 </div>
+
                 <!-- Toggle Opponent Board Button for Mobile -->
-                <button id="btn-toggle-opponent-board" onclick="toggleOpponentBoardMobile()" class="md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5">
+                <button id="btn-toggle-opponent-board" onclick="toggleOpponentBoardMobile()" class="hidden md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-eye-slash"></i> Sembunyikan Papan Lawan
                 </button>
             </div>
@@ -151,7 +185,7 @@
     </section>
 
     <!-- Main Container -->
-    <main id="main-container" class="relative z-10 flex-grow w-full max-w-lg mx-auto px-4 py-4 sm:py-6 flex flex-col justify-center gap-4 sm:gap-6 transition-all duration-300">
+    <main id="main-container" class="relative z-10 flex-grow w-full max-w-2xl mx-auto px-4 py-4 sm:py-6 flex flex-col justify-center gap-4 sm:gap-6 transition-all duration-300">
         
         <div id="boards-wrapper" class="flex flex-col md:flex-row justify-center items-center gap-6 w-full">
             
@@ -325,7 +359,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-10 py-4 text-center text-[10px] text-gray-500 border-t border-gray-800/40 glass-panel bg-gray-900/10">
+    <footer class="relative z-10 py-5 text-center text-xs text-gray-500 border-t border-gray-800/40 glass-panel bg-gray-900/10">
         <p>&copy; 2026 Logicall Wordle.</p>
     </footer>
 
@@ -492,6 +526,6 @@
     </div>
 
     <!-- Application Script -->
-    <script src="app.js?v=1.4.0"></script>
+    <script src="app.js?v=1.6.0"></script>
 </body>
 </html>
