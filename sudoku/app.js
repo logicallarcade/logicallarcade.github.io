@@ -682,7 +682,8 @@ function selectCell(row, col) {
         sendToPeer({ type: 'select', r: row, c: col, clientId: myClientId, username: myUsername });
     }
 
-    // Auto-focus mobile input trigger if editable cell
+    // Auto-focus mobile input trigger if editable cell (removed to prevent virtual keyboard popup on mobile)
+    /*
     const trigger = document.getElementById('mobile-input-trigger');
     if (trigger) {
         if (initialValues[row][col] === 0 && !hintBoard[row][col]) {
@@ -700,6 +701,7 @@ function selectCell(row, col) {
             }
         }
     }
+    */
 }
 
 // Analyzes the current grid to identify duplicate values in rows, cols, and 3x3 box environments
