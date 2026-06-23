@@ -149,6 +149,18 @@ document.addEventListener('DOMContentLoaded', () => {
     checkRoomParameter();
 });
 
+// Auto-join from lobby URL param (?room=XXXX)
+function checkRoomParameter() {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    if (roomParam) {
+        const code = roomParam.trim().toUpperCase();
+        const input = document.getElementById('room-code-input');
+        if (input) input.value = code;
+        setTimeout(() => joinRoomByCode(), 400);
+    }
+}
+
 // View Navigation Transitions
 function enterSudokuGame() {
     switchView(menuView, gameView);
@@ -391,7 +403,11 @@ function generateSudoku(difficulty) {
 
 function initNewGame() {
     if (isMultiplayer && !isHost) {
-        alert("Hanya Host yang bisa memulai game baru!");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Hanya Host', html: 'Hanya Host yang bisa memulai game baru!',
+            icon: 'warning', iconColor: '#f59e0b', confirmButtonText: 'OK',
+        });
         return;
     }
 
@@ -459,7 +475,11 @@ function initNewGame() {
 function resetBoard() {
     if (!isGameActive) return;
     if (isMultiplayer && !isHost) {
-        alert("Hanya Host yang bisa me-reset game!");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Hanya Host', html: 'Hanya Host yang bisa me-reset game!',
+            icon: 'warning', iconColor: '#f59e0b', confirmButtonText: 'OK',
+        });
         return;
     }
     
@@ -1186,9 +1206,11 @@ function setupSupabaseChannel(code) {
         const isMeTracked = players.some(p => p.clientId === myClientId);
         if (!isMeTracked) {
             if (players.length >= 5) {
-                alert("Room penuh! Maksimal 5 pemain.");
-                cleanupMultiplayerSession();
-                backToMenu();
+                Swal.fire({
+                    background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
+                    title: 'Room Penuh!', html: 'Room ini sudah penuh (maksimal 5 pemain).',
+                    icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+                }).then(() => { cleanupMultiplayerSession(); backToMenu(); });
                 return;
             }
             
@@ -1204,9 +1226,11 @@ function setupSupabaseChannel(code) {
 
         const myIdx = players.findIndex(p => p.clientId === myClientId);
         if (myIdx >= 5) {
-            alert("Room penuh! Maksimal 5 pemain.");
-            cleanupMultiplayerSession();
-            backToMenu();
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
+                title: 'Room Penuh!', html: 'Room ini sudah penuh (maksimal 5 pemain).',
+                icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+            }).then(() => { cleanupMultiplayerSession(); backToMenu(); });
             return;
         }
 
@@ -1229,9 +1253,11 @@ function setupSupabaseChannel(code) {
         // --- CHECK IF HOST LEFT THE ROOM ---
         const hostPresent = activePlayers.some(p => p.role === 'HOST');
         if (!isHost && !hostPresent && activePlayers.length > 0) {
-            alert("Host telah menutup room.");
-            cleanupMultiplayerSession();
-            backToMenu();
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+                title: 'Room Ditutup', html: 'Host telah menutup room ini.',
+                icon: 'info', iconColor: '#6366f1', confirmButtonText: 'OK',
+            }).then(() => { cleanupMultiplayerSession(); backToMenu(); });
             return;
         }
 
@@ -1324,7 +1350,11 @@ function setupSupabaseChannel(code) {
 // Host Room creation
 function createMultiplayerRoom() {
     if (typeof supabase === 'undefined' || !supabaseClient) {
-        alert("Gagal memuat sistem multiplayer Supabase. Periksa koneksi internet Anda.");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Gagal Terhubung', html: 'Gagal memuat sistem multiplayer. Periksa koneksi internet Anda.',
+            icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+        });
         return;
     }
     
@@ -1371,7 +1401,11 @@ function createMultiplayerRoom() {
 // Guest Room join
 function connectToMultiplayerRoom(hostId) {
     if (typeof supabase === 'undefined' || !supabaseClient) {
-        alert("Gagal memuat sistem multiplayer Supabase. Periksa koneksi internet Anda.");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Gagal Terhubung', html: 'Gagal memuat sistem multiplayer. Periksa koneksi internet Anda.',
+            icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+        });
         return;
     }
     
@@ -1481,11 +1515,14 @@ function handleIncomingData(data) {
     else if (data.type === 'kick') {
         if (!data.targetClientId || data.targetClientId === myClientId) {
             wasKickedByHost = true;
-            alert("Anda telah dikeluarkan dari room oleh Host.");
-            if (activeConnection) {
-                activeConnection.close();
-            }
-            backToMenu();
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
+                title: 'Dikeluarkan!', html: 'Anda telah dikeluarkan dari room oleh Host.',
+                icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+            }).then(() => {
+                if (activeConnection) activeConnection.close();
+                backToMenu();
+            });
         }
     }
     
@@ -1565,11 +1602,14 @@ function handleIncomingData(data) {
     }
     
     else if (data.type === 'close-room') {
-        alert("Host telah menutup room.");
-        if (activeConnection) {
-            activeConnection.close();
-        }
-        backToMenu();
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Room Ditutup', html: 'Host telah menutup room ini.',
+            icon: 'info', iconColor: '#6366f1', confirmButtonText: 'OK',
+        }).then(() => {
+            if (activeConnection) activeConnection.close();
+            backToMenu();
+        });
     }
     
     else if (data.type === 'game-over') {
@@ -1850,18 +1890,23 @@ function generateShortCode() {
 function joinRoomByCode() {
     const input = document.getElementById('room-code-input');
     if (!input) return;
-    
     const code = input.value.trim().toUpperCase();
     if (!code) {
-        alert("Harap masukkan kode room terlebih dahulu!");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Kode Kosong', html: 'Harap masukkan kode room terlebih dahulu!',
+            icon: 'warning', iconColor: '#f59e0b', confirmButtonText: 'OK',
+        });
         return;
     }
-    
     if (code.length !== 6) {
-        alert("Kode room harus terdiri dari 6 karakter!");
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Kode Tidak Valid', html: 'Kode room harus terdiri dari <b>6 karakter</b>!',
+            icon: 'warning', iconColor: '#f59e0b', confirmButtonText: 'OK',
+        });
         return;
     }
-    
     const hostId = 'logicall-' + code;
     connectToMultiplayerRoom(hostId);
 }
@@ -1909,21 +1954,30 @@ function hideGameOverModal() {
 
 function leaveOrDestroyRoom() {
     if (!isMultiplayer) return;
-    
-    const confirmMsg = isHost 
-        ? "Apakah Anda yakin ingin menutup room multiplayer ini? Koneksi dengan teman Anda akan terputus."
-        : "Apakah Anda yakin ingin keluar dari room multiplayer ini?";
-        
-    if (confirm(confirmMsg)) {
-        if (isHost) {
-            sendToPeer({ type: 'close-room' });
-            setTimeout(() => {
+    const title = isHost ? 'Tutup Room?' : 'Keluar Room?';
+    const html = isHost
+        ? 'Koneksi dengan semua teman Anda akan terputus.'
+        : 'Apakah Anda yakin ingin keluar dari room ini?';
+    Swal.fire({
+        background: '#0f1623', color: '#e5e7eb',
+        confirmButtonColor: isHost ? '#ef4444' : '#8b5cf6',
+        cancelButtonColor: '#374151',
+        title, html,
+        icon: 'question', iconColor: '#8b5cf6',
+        showCancelButton: true,
+        confirmButtonText: isHost ? '<i class="fa-solid fa-rectangle-xmark"></i>&nbsp;Tutup Room' : '<i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Keluar',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            if (isHost) {
+                sendToPeer({ type: 'close-room' });
+                setTimeout(() => cleanupMultiplayerSession(), 100);
+            } else {
                 cleanupMultiplayerSession();
-            }, 100);
-        } else {
-            cleanupMultiplayerSession();
+            }
         }
-    }
+    });
 }
 
 function cleanupMultiplayerSession() {
@@ -1997,11 +2051,23 @@ function requestNewGameFromModal() {
 }
 
 function triggerHardReload() {
-    if (confirm("Apakah Anda yakin ingin melakukan Reset Total? Ini akan menghapus progres game aktif dan memuat ulang halaman secara bersih.")) {
-        clearGameProgress();
-        localStorage.removeItem('logicall_active_view');
-        window.location.href = window.location.origin + window.location.pathname;
-    }
+    Swal.fire({
+        background: '#0f1623', color: '#e5e7eb',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+        title: 'Reset Total?',
+        html: 'Ini akan menghapus progres game aktif dan memuat ulang halaman secara bersih.',
+        icon: 'warning', iconColor: '#f59e0b',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-trash"></i>&nbsp;Ya, Reset!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            clearGameProgress();
+            localStorage.removeItem('logicall_active_view');
+            window.location.href = window.location.origin + window.location.pathname;
+        }
+    });
 }
 
 function shareRoomToLobby() {
@@ -2013,11 +2079,7 @@ function shareRoomToLobby() {
     }
 
     lobbyChannel = supabaseClient.channel('arcade-lobby', {
-        config: {
-            presence: {
-                key: myClientId,
-            },
-        },
+        config: { presence: { key: myClientId } },
     });
 
     lobbyChannel.subscribe(async (status) => {
@@ -2038,7 +2100,14 @@ function shareRoomToLobby() {
                 shareBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Telah Dibagikan';
                 shareBtn.className = "w-full py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-600/20 rounded text-[10px] font-bold cursor-not-allowed flex items-center justify-center gap-1";
             }
-            alert("Room berhasil dibagikan ke Lobby!");
+
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+                title: 'Room Dibagikan! 🎉',
+                html: `Kode <b style="color:#8b5cf6">${roomCode}</b> kini terlihat di Lobby utama.`,
+                icon: 'success', iconColor: '#8b5cf6',
+                timer: 2500, timerProgressBar: true, showConfirmButton: false,
+            });
         }
     });
 }

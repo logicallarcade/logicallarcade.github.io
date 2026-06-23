@@ -59,6 +59,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load stats
     loadStatsFromStorage();
 
+    // Check for ?room= URL param (join from lobby)
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    if (roomParam) {
+        // Pre-fill room code input and auto-join as guest
+        const input = document.getElementById('room-code-input');
+        if (input) input.value = roomParam.trim().toUpperCase();
+        // Wait for DOM to settle, then auto-join
+        setTimeout(() => {
+            joinVersusRoomByCode();
+        }, 300);
+        // Skip first-time tutorial when joining from lobby
+        return;
+    }
+
     // Init the game
     initGame();
 
@@ -619,17 +634,35 @@ function handleStatsLeftClick() {
 function confirmRestartGame() {
     if (isMultiplayer) {
         if (isHost) {
-            if (confirm('Apakah Anda yakin ingin memulai game baru? Sesi multiplayer saat ini akan dimulai ulang dengan kata baru.')) {
-                restartGame();
-            }
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb',
+                confirmButtonColor: '#8b5cf6', cancelButtonColor: '#374151',
+                title: 'Mulai Game Baru?',
+                html: 'Sesi multiplayer saat ini akan dimulai ulang dengan kata baru.',
+                icon: 'question', iconColor: '#8b5cf6',
+                showCancelButton: true,
+                confirmButtonText: '▶ Ya, Mulai!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+            }).then(result => { if (result.isConfirmed) restartGame(); });
         } else {
-            showToast("Hanya Host yang dapat memulai ulang permainan!");
+            showToast('Hanya Host yang dapat memulai ulang permainan!');
         }
     } else {
         if (!gameActive) {
             restartGame();
-        } else if (confirm('Apakah Anda yakin ingin mengganti kata rahasia saat ini? Ini tidak akan membatalkan statistik, tetapi akan menghentikan permainan yang sedang berjalan.')) {
-            restartGame();
+        } else {
+            Swal.fire({
+                background: '#0f1623', color: '#e5e7eb',
+                confirmButtonColor: '#8b5cf6', cancelButtonColor: '#374151',
+                title: 'Ganti Kata Rahasia?',
+                html: 'Permainan yang sedang berjalan akan dihentikan. Statistik tidak terpengaruh.',
+                icon: 'question', iconColor: '#8b5cf6',
+                showCancelButton: true,
+                confirmButtonText: '▶ Ya, Ganti!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+            }).then(result => { if (result.isConfirmed) restartGame(); });
         }
     }
 }
@@ -952,10 +985,12 @@ function handlePresenceSync(presenceState) {
 
     // --- CHECK IF HOST LEFT THE ROOM ---
     if (!isHost && activePlayers.length > 0 && !activePlayers.some(p => p.role === 'host')) {
-        showToast("Host telah menutup room.");
-        alert("Host telah menutup room.");
-        leaveVersusRoom(true);
-        window.location.href = '../';
+        showToast('Host telah menutup room.');
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#8b5cf6',
+            title: 'Room Ditutup', html: 'Host telah menutup room ini.',
+            icon: 'info', iconColor: '#6366f1', confirmButtonText: 'OK',
+        }).then(() => { leaveVersusRoom(true); window.location.href = '../'; });
         return;
     }
 
@@ -1352,23 +1387,36 @@ function endVersusMatch() {
 function handleVersusKick(data) {
     const payload = data.payload;
     if (payload.targetClientId === myClientId) {
-        showToast("Anda telah dikeluarkan dari room oleh Host.");
-        alert("Anda telah dikeluarkan dari room oleh Host.");
-        leaveVersusRoom(true);
-        window.location.href = '../';
+        showToast('Anda telah dikeluarkan dari room oleh Host.');
+        Swal.fire({
+            background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
+            title: 'Dikeluarkan!', html: 'Anda telah dikeluarkan dari room oleh Host.',
+            icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
+        }).then(() => { leaveVersusRoom(true); window.location.href = '../'; });
     }
 }
 
 function kickGuest(clientId, username) {
     if (!isHost || !roomChannel) return;
-    
-    if (confirm(`Apakah Anda yakin ingin mengeluarkan ${username || 'Tamu'} dari room?`)) {
-        roomChannel.send({
-            type: 'broadcast',
-            event: 'versus-kick',
-            payload: { targetClientId: clientId }
-        });
-    }
+    Swal.fire({
+        background: '#0f1623', color: '#e5e7eb',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+        title: 'Keluarkan Pemain?',
+        html: `Apakah Anda yakin ingin mengeluarkan <strong style="color:#ef4444">${username || 'Tamu'}</strong> dari room?`,
+        icon: 'warning', iconColor: '#f59e0b',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-user-slash"></i>&nbsp;Keluarkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            roomChannel.send({
+                type: 'broadcast',
+                event: 'versus-kick',
+                payload: { targetClientId: clientId }
+            });
+        }
+    });
 }
 
 let opponentBoardVisibleMobile = true;

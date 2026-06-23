@@ -121,3 +121,38 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* ── SweetAlert2 Dark Theme Overrides ────────────────────────────── */
+.swal2-popup {
+    font-family: var(--font-body) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.1) !important;
+    backdrop-filter: blur(20px) !important;
+}
+.swal2-title {
+    font-family: var(--font-heading) !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+.swal2-html-container {
+    font-size: 0.83rem !important;
+    line-height: 1.6 !important;
+    color: #9ca3af !important;
+}
+.swal2-confirm, .swal2-cancel {
+    font-family: var(--font-body) !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.03em !important;
+    border-radius: 0.6rem !important;
+    padding: 0.55rem 1.4rem !important;
+    transition: all 0.18s ease !important;
+}
+.swal2-confirm:hover { opacity: 0.88; transform: translateY(-1px); }
+.swal2-timer-progress-bar { background: rgba(139, 92, 246, 0.7) !important; }
+.swal2-icon { border-width: 2px !important; }
+.swal2-icon.swal2-success { border-color: rgba(139,92,246,0.4) !important; }
+.swal2-icon.swal2-success [class^=swal2-success-line] { background: #8b5cf6 !important; }
+.swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(139,92,246,0.3) !important; }
