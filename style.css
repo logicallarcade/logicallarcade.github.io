@@ -6,27 +6,7 @@
     
     --color-bg-deep: #0b0f17;
     --color-bg-panel: rgba(22, 28, 45, 0.7);
-    --color-border-glow: rgba(139, 92, 246, 0.4);
-    
-    /* Sudoku Board Themes */
-    --cell-bg-default: rgba(30, 41, 59, 0.4);
-    --cell-bg-given: rgba(30, 41, 59, 0.6);
-    --cell-text-given: #e2e8f0;
-    --cell-text-user: #818cf8;
-    --cell-text-hint: #10b981;
-    
-    --cell-bg-selected: rgba(139, 92, 246, 0.35);
-    --cell-bg-highlight: rgba(99, 102, 241, 0.12);
-    --cell-bg-same-value: rgba(245, 158, 11, 0.2);
-    --cell-bg-error: rgba(239, 68, 68, 0.25);
-    --cell-text-error: #f87171;
-
-    /* Sudoku Board Border Styles */
-    --board-border-thin: 1px solid #334155;
-    --board-border-thick: 4px solid #64748b; /* slate-500 for high visibility */
-    --board-border-outer: 6px solid #475569;   /* slate-600 */
 }
-
 
 html, body {
     max-width: 100%;
@@ -111,172 +91,27 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-/* Sudoku Grid Layout */
-.sudoku-board {
-    display: grid;
-    grid-template-columns: repeat(9, minmax(0, 1fr));
-    grid-template-rows: repeat(9, minmax(0, 1fr));
-    border: var(--board-border-outer);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    background-color: #1e293b; /* slate-800 */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100%;
+/* Pulsing highlight for Wordle */
+.wordle-promo-card {
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    animation: pulseWordleBorder 3s infinite alternate;
 }
 
-/* Styling border thickness for 3x3 blocks */
-.sudoku-cell {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    background-color: var(--cell-bg-default);
-    /* Only right and bottom borders to avoid doubling and messy overlap */
-    border: none;
-    border-right: var(--board-border-thin);
-    border-bottom: var(--board-border-thin);
-    background-clip: padding-box; /* Prevent background highlight color from bleeding under borders */
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
-    box-sizing: border-box;
+.wordle-promo-card:hover {
+    border-color: rgba(16, 185, 129, 0.8);
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.45);
 }
 
-/* Thicker borders for columns */
-.sudoku-cell:nth-child(3n) {
-    border-right: var(--board-border-thick);
-}
-.sudoku-cell:nth-child(9n) {
-    border-right: none;
-}
-
-/* Thicker borders for rows using row ranges */
-/* Row 1-9 correspond to cells index range */
-.sudoku-cell:nth-child(n+19):nth-child(-n+27),
-.sudoku-cell:nth-child(n+46):nth-child(-n+54) {
-    border-bottom: var(--board-border-thick);
-}
-.sudoku-cell:nth-child(n+73) {
-    border-bottom: none;
-}
-
-/* Base cell styling states */
-.sudoku-cell.given {
-    background-color: var(--cell-bg-given);
-    color: var(--cell-text-given);
-    font-weight: 800;
-}
-
-.sudoku-cell.user {
-    color: var(--cell-text-user);
-}
-
-.sudoku-cell.hint {
-    color: var(--cell-text-hint);
-    font-weight: 800;
-}
-
-/* Highlights */
-.sudoku-cell.selected {
-    background-color: var(--cell-bg-selected) !important;
-    box-shadow: inset 0 0 0 3px #8b5cf6;
-    z-index: 10;
-}
-
-.sudoku-cell.highlighted-peer {
-    background-color: var(--cell-bg-highlight);
-}
-
-.sudoku-cell.same-value {
-    background-color: var(--cell-bg-same-value);
-}
-
-.sudoku-cell.error {
-    background-color: var(--cell-bg-error);
-    color: var(--cell-text-error) !important;
-    animation: shake 0.4s ease-in-out;
-}
-
-/* Remote Player Selection (Co-op) */
-.sudoku-cell.remote-selected {
-    box-shadow: inset 0 0 0 3px #10b981;
-    z-index: 9;
-}
-.sudoku-cell.remote-selected::after {
-    content: attr(data-player-name);
-    position: absolute;
-    bottom: 2px;
-    right: 4px;
-    font-size: 7px;
-    font-weight: 800;
-    color: #10b981;
-    line-height: 1;
-    pointer-events: none;
-    z-index: 20;
-    background-color: rgba(11, 15, 23, 0.8);
-    padding: 1px 3px;
-    border-radius: 2px;
-}
-
-/* Note layout: 3x3 grid inside the cell */
-.note-grid {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-    padding: 0.15rem;
-    box-sizing: border-box;
-    pointer-events: none;
-}
-
-.note-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 500;
-    color: #94a3b8; /* slate-400 */
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-
-.note-cell.active {
-    opacity: 1;
-}
-
-/* Shaking animation for duplicate/invalid entry */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-4px); }
-    40%, 80% { transform: translateX(4px); }
-}
-
-/* Transitions */
-.view-transition {
-    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hidden-fade {
-    opacity: 0;
-    transform: scale(0.95);
-    pointer-events: none;
-    position: absolute;
-    width: 100%;
-}
-
-.visible-fade {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
+@keyframes pulseWordleBorder {
+    0% {
+        border-color: rgba(16, 185, 129, 0.4);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+    }
+    100% {
+        border-color: rgba(52, 211, 153, 0.8);
+        box-shadow: 0 0 35px rgba(52, 211, 153, 0.4);
+    }
 }
 
 /* Glassmorphism containers */
@@ -286,39 +121,3 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
-
-/* Custom Scrollbar for modern touch */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-track {
-    background: #0b0f17;
-}
-::-webkit-scrollbar-thumb {
-    background: #1f2937;
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #374151;
-}
-
-/* Responsive Sudoku Board Scale on small viewports */
-@media (max-width: 480px) {
-    .sudoku-cell {
-        font-size: 1.25rem;
-    }
-}
-@media (max-width: 380px) {
-    .sudoku-cell {
-        font-size: 1.15rem;
-    }
-    .note-cell {
-        font-size: 0.55rem;
-    }
-}
-@media (max-width: 340px) {
-    .sudoku-cell {
-        font-size: 1.05rem;
-    }
-}
-

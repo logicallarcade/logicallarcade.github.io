@@ -1,0 +1,321 @@
+/* Premium Wordle CSS */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    
+    --color-bg-deep: #0b0f17;
+    --color-bg-panel: rgba(22, 28, 45, 0.7);
+    
+    /* Wordle states */
+    --color-correct: #10b981;    /* Emerald green */
+    --color-present: #f59e0b;    /* Amber yellow */
+    --color-absent: #374151;     /* Cool gray */
+    --color-cell-border: #1f2937;
+    --color-cell-typed: #4b5563;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg-deep);
+    color: #f3f4f6;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+        linear-gradient(rgba(17, 24, 39, 0.8) 0%, rgba(11, 15, 23, 0.95) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+}
+
+/* Glassmorphism panel */
+.glass-panel {
+    background: var(--color-bg-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Grid Layout */
+.wordle-grid {
+    display: grid;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+}
+
+.grid-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+/* Cell Style */
+.grid-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 2px solid var(--color-cell-border);
+    border-radius: 0.5rem;
+    background-color: rgba(17, 24, 39, 0.5);
+    user-select: none;
+    transition: border-color 0.1s ease;
+    box-sizing: border-box;
+}
+
+.grid-cell.typed {
+    border-color: var(--color-cell-typed);
+    animation: popIn 0.1s ease-out;
+}
+
+/* State Styling for guesses */
+.grid-cell.correct {
+    background-color: var(--color-correct) !important;
+    border-color: var(--color-correct) !important;
+    color: #ffffff;
+}
+
+.grid-cell.present {
+    background-color: var(--color-present) !important;
+    border-color: var(--color-present) !important;
+    color: #ffffff;
+}
+
+.grid-cell.absent {
+    background-color: var(--color-absent) !important;
+    border-color: var(--color-absent) !important;
+    color: #9ca3af;
+}
+
+/* 3D Flip Animation */
+.grid-cell.flip-in {
+    animation: flipIn 0.3s ease-in forwards;
+}
+
+.grid-cell.flip-out {
+    animation: flipOut 0.3s ease-out forwards;
+}
+
+/* Keyboard Layout */
+.keyboard {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.3rem;
+    width: 100%;
+}
+
+.key-btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 0.375rem;
+    background-color: #1f2937;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.key-btn:active {
+    transform: scale(0.95);
+}
+
+.key-btn.wide {
+    flex: 1.5;
+    font-size: 0.75rem;
+}
+
+/* Keyboard key states */
+.key-btn.correct {
+    background-color: var(--color-correct);
+    color: white;
+}
+
+.key-btn.present {
+    background-color: var(--color-present);
+    color: white;
+}
+
+.key-btn.absent {
+    background-color: var(--color-absent);
+    color: #6b7280;
+}
+
+/* Custom Alert Toast */
+.toast-container {
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.toast {
+    background-color: #111827;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    animation: fadeInOut 2s ease-in-out forwards;
+}
+
+/* Animations declarations */
+@keyframes popIn {
+    0% {
+        transform: scale(0.9);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes flipIn {
+    0% {
+        transform: rotateX(0deg);
+    }
+    100% {
+        transform: rotateX(90deg);
+    }
+}
+
+@keyframes flipOut {
+    0% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake-row {
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Keyboard and Grid Scaling for Mobile */
+@media (max-width: 480px) {
+    .wordle-grid {
+        max-width: 280px;
+        gap: 0.4rem;
+    }
+    
+    .grid-row {
+        gap: 0.4rem;
+    }
+    
+    .grid-cell {
+        font-size: 1.5rem;
+        border-radius: 0.375rem;
+    }
+    
+    .key-btn {
+        height: 42px;
+        font-size: 0.75rem;
+    }
+    
+    .key-btn.wide {
+        font-size: 0.65rem;
+    }
+}
+
+/* --- MULTIPLAYER VERSUS STYLE --- */
+#main-container.multiplayer-active {
+    max-width: 780px !important;
+}
+
+#opponent-board-wrapper {
+    transition: all 0.3s ease;
+}
+
+#opponent-mask {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 20;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#opponent-mask.revealed {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Reduce scale of boards on smaller screens when multiplayer is active */
+@media (max-width: 767px) {
+    #boards-wrapper {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    #opponent-board-wrapper {
+        margin-top: 1rem;
+    }
+}
+
