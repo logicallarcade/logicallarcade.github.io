@@ -741,6 +741,14 @@ async function createVersusRoom() {
     
     // Adjust main container width
     document.getElementById('main-container').classList.add('multiplayer-active');
+
+    // Show toggle opponent board button on mobile
+    opponentBoardVisibleMobile = true;
+    const toggleBtn = document.getElementById('btn-toggle-opponent-board');
+    if (toggleBtn) {
+        toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Sembunyikan Papan Lawan';
+        toggleBtn.className = "md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5";
+    }
     
     setupSupabaseVersus();
     initGame();
@@ -815,6 +823,14 @@ function transitionUIForGuest() {
     
     // Adjust main container width
     document.getElementById('main-container').classList.add('multiplayer-active');
+
+    // Show toggle opponent board button on mobile
+    opponentBoardVisibleMobile = true;
+    const toggleBtn = document.getElementById('btn-toggle-opponent-board');
+    if (toggleBtn) {
+        toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Sembunyikan Papan Lawan';
+        toggleBtn.className = "md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5";
+    }
     
     initGame();
 }
@@ -877,7 +893,7 @@ function leaveVersusRoom(quiet = false) {
     const toggleBtn = document.getElementById('btn-toggle-opponent-board');
     if (toggleBtn) {
         toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Sembunyikan Papan Lawan';
-        toggleBtn.className = "md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5";
+        toggleBtn.className = "hidden md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5";
     }
 
     initGame();
