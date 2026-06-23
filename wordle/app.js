@@ -176,24 +176,27 @@ function setupKeyboardListeners() {
         });
     });
 
-    // Physical keyboard press
-    document.addEventListener('keydown', (e) => {
-        if (!gameActive || isAnimating) return;
-        
-        // Ignore typing when in inputs/modals
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return;
-        }
+    // Physical keyboard press — safely remove and re-add to avoid duplicate listeners
+    document.removeEventListener('keydown', handlePhysicalKeyDown);
+    document.addEventListener('keydown', handlePhysicalKeyDown);
+}
 
-        const key = e.key.toUpperCase();
-        if (key === 'ENTER') {
-            handleKeyPress('ENTER');
-        } else if (key === 'BACKSPACE' || key === 'BACK') {
-            handleKeyPress('BACKSPACE');
-        } else if (/^[A-Z]$/.test(key)) {
-            handleKeyPress(key);
-        }
-    });
+function handlePhysicalKeyDown(e) {
+    if (!gameActive || isAnimating) return;
+    
+    // Ignore typing when in inputs/modals
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
+
+    const key = e.key.toUpperCase();
+    if (key === 'ENTER') {
+        handleKeyPress('ENTER');
+    } else if (key === 'BACKSPACE' || key === 'BACK') {
+        handleKeyPress('BACKSPACE');
+    } else if (/^[A-Z]$/.test(key)) {
+        handleKeyPress(key);
+    }
 }
 
 function handleKeyPress(key) {
