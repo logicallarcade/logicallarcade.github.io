@@ -2090,25 +2090,6 @@ function requestNewGameFromModal() {
     }
 }
 
-function triggerHardReload() {
-    Swal.fire({
-        background: '#0f1623', color: '#e5e7eb',
-        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
-        title: 'Reset Total?',
-        html: 'Ini akan menghapus progres game aktif dan memuat ulang halaman secara bersih.',
-        icon: 'warning', iconColor: '#f59e0b',
-        showCancelButton: true,
-        confirmButtonText: '<i class="fa-solid fa-trash"></i>&nbsp;Ya, Reset!',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-    }).then(result => {
-        if (result.isConfirmed) {
-            clearGameProgress();
-            localStorage.removeItem('logicall_active_view');
-            window.location.href = window.location.origin + window.location.pathname;
-        }
-    });
-}
 
 function shareRoomToLobby() {
     if (typeof supabase === 'undefined' || !supabaseClient || !roomCode || !isHost) return;
