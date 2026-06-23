@@ -157,13 +157,22 @@ async function initGame() {
 
 // --- LOGIC KEYBOARD ---
 function setupKeyboardListeners() {
-    // Screen keyboard click
+    // Screen keyboard — use pointerdown for instant response on mobile
+    // (avoids the 300ms tap delay that blocks guest input on touch devices)
     const keys = document.querySelectorAll('.key-btn');
     keys.forEach(key => {
-        key.addEventListener('click', () => {
+        // Remove old listeners by cloning the node (prevents duplicate listeners on re-call)
+        const newKey = key.cloneNode(true);
+        key.parentNode.replaceChild(newKey, key);
+
+        newKey.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); // stop scroll & 300ms delay
             if (!gameActive || isAnimating) return;
-            const keyValue = key.getAttribute('data-key');
+            const keyValue = newKey.getAttribute('data-key');
             handleKeyPress(keyValue);
+            // Visual press feedback
+            newKey.style.transform = 'scale(0.9)';
+            setTimeout(() => newKey.style.transform = '', 120);
         });
     });
 
@@ -1145,6 +1154,9 @@ function startLocalVersusGame(word) {
         mask.classList.remove('revealed');
         document.getElementById('opponent-status-text').textContent = "Sedang bermain... Tebakan 0/6";
     }
+
+    // Re-attach keyboard listeners (keys were cloned in setupKeyboardListeners)
+    setupKeyboardListeners();
 
     showToast("Permainan Versus Dimulai!");
 }

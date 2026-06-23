@@ -319,6 +319,17 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* ── Mobile keyboard: eliminate 300ms tap delay & double-tap zoom ─── */
+.key-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+#keyboard-area, #wordle-keyboard {
+    touch-action: manipulation;
+}
+
 /* ── Custom Scrollbar ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: rgba(15, 22, 35, 0.4); border-radius: 99px; }
