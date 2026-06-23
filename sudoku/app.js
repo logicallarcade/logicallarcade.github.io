@@ -41,18 +41,6 @@ let lobbyChannel = null;
 let isSharedToLobby = false;
 const myClientId = Math.random().toString(36).substring(2);
 
-function validateCoopPlayers() {
-    const minSelect = document.getElementById('coop-min-select');
-    const maxSelect = document.getElementById('coop-max-select');
-    if (!minSelect || !maxSelect) return;
-    
-    let minVal = parseInt(minSelect.value);
-    let maxVal = parseInt(maxSelect.value);
-    
-    if (minVal > maxVal) {
-        maxSelect.value = minVal;
-    }
-}
 let activeConnection = null;
 let remoteSelectedCell = null;
 let peerInstance = null;
@@ -1394,9 +1382,8 @@ function createMultiplayerRoom() {
     isHost = true;
     
     // Read co-op capacity settings
-    const minSelect = document.getElementById('coop-min-select');
+    roomMinPlayers = 2; // Default to 2
     const maxSelect = document.getElementById('coop-max-select');
-    roomMinPlayers = minSelect ? parseInt(minSelect.value) : 2;
     roomMaxPlayers = maxSelect ? parseInt(maxSelect.value) : 5;
     
     // Hide co-op settings area

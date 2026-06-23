@@ -236,28 +236,18 @@
                             <span id="player-role-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded bg-brandPurple/20 text-brandPurple border border-brandPurple/30 uppercase tracking-wide">HOST</span>
                         </div>
 
-                            <!-- Settings Co-op (Min & Max Players) -->
-                            <div id="coop-settings-area" class="flex flex-col gap-2 bg-slate-900/60 p-2.5 rounded-xl border border-gray-800/50 mb-1">
-                                <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider block"><i class="fa-solid fa-sliders text-brandPurple mr-1"></i>Kapasitas Co-op</span>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <div class="flex flex-col gap-1">
-                                        <label for="coop-min-select" class="text-[8px] text-gray-500 font-bold uppercase text-gray-400">Minimal</label>
-                                        <select id="coop-min-select" onchange="validateCoopPlayers()" class="bg-slate-950 border border-gray-800 text-white font-extrabold text-[10px] rounded px-2 py-1 focus:outline-none cursor-pointer">
-                                            <option value="2">2 Pemain</option>
-                                            <option value="3">3 Pemain</option>
-                                            <option value="4">4 Pemain</option>
-                                            <option value="5">5 Pemain</option>
-                                        </select>
-                                    </div>
-                                    <div class="flex flex-col gap-1">
-                                        <label for="coop-max-select" class="text-[8px] text-gray-500 font-bold uppercase text-gray-400">Maksimal</label>
-                                        <select id="coop-max-select" onchange="validateCoopPlayers()" class="bg-slate-950 border border-gray-800 text-white font-extrabold text-[10px] rounded px-2 py-1 focus:outline-none cursor-pointer">
-                                            <option value="2">2 Pemain</option>
-                                            <option value="3">3 Pemain</option>
-                                            <option value="4">4 Pemain</option>
-                                            <option value="5" selected>5 Pemain</option>
-                                        </select>
-                                    </div>
+                            <!-- Settings Co-op (Max Players Only) -->
+                            <div id="coop-settings-area" class="flex items-center justify-between gap-3 bg-slate-900/60 px-3.5 py-2.5 rounded-xl border border-gray-800/50 mb-1">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-users text-brandPurple"></i> Maksimal Pemain:
+                                </span>
+                                <div class="bg-slate-950 border border-gray-800/80 px-2 py-1 rounded-lg flex items-center shadow-inner hover:border-brandPurple/40 transition duration-200">
+                                    <select id="coop-max-select" class="bg-transparent text-white font-extrabold text-[11px] focus:outline-none cursor-pointer border-none p-0 outline-none">
+                                        <option value="2" class="bg-gray-900">2 Pemain</option>
+                                        <option value="3" class="bg-gray-900">3 Pemain</option>
+                                        <option value="4" class="bg-gray-900">4 Pemain</option>
+                                        <option value="5" selected class="bg-gray-900">5 Pemain</option>
+                                    </select>
                                 </div>
                             </div>
 
