@@ -1793,9 +1793,21 @@ function kickGuest(clientId, username) {
         }
     }
 
-    if (confirm(`Apakah Anda yakin ingin mengeluarkan ${username || 'Tamu'} dari room?`)) {
-        sendToPeer({ type: 'kick', targetClientId: clientId });
-    }
+    Swal.fire({
+        background: '#0f1623', color: '#e5e7eb',
+        confirmButtonColor: '#ef4444', cancelButtonColor: '#374151',
+        title: 'Keluarkan Pemain?',
+        html: `Apakah Anda yakin ingin mengeluarkan <strong style="color:#ef4444">${username || 'Tamu'}</strong> dari room?`,
+        icon: 'warning', iconColor: '#f59e0b',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-user-slash"></i>&nbsp;Keluarkan',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+    }).then(result => {
+        if (result.isConfirmed) {
+            sendToPeer({ type: 'kick', targetClientId: clientId });
+        }
+    });
 }
 
 function setupMobileInputTrigger() {
