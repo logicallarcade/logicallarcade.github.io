@@ -33,11 +33,26 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let isMultiplayer = false;
 let isHost = false;
+let roomMinPlayers = 2;
+let roomMaxPlayers = 5;
 let roomChannel = null;
 let roomCode = "";
 let lobbyChannel = null;
 let isSharedToLobby = false;
 const myClientId = Math.random().toString(36).substring(2);
+
+function validateCoopPlayers() {
+    const minSelect = document.getElementById('coop-min-select');
+    const maxSelect = document.getElementById('coop-max-select');
+    if (!minSelect || !maxSelect) return;
+    
+    let minVal = parseInt(minSelect.value);
+    let maxVal = parseInt(maxSelect.value);
+    
+    if (minVal > maxVal) {
+        maxSelect.value = minVal;
+    }
+}
 let activeConnection = null;
 let remoteSelectedCell = null;
 let peerInstance = null;
@@ -1203,12 +1218,16 @@ function setupSupabaseChannel(code) {
             return timeA - timeB;
         });
 
+        const hostPresence = players.find(p => p.role === 'HOST');
+        const currentMaxPlayers = hostPresence && hostPresence.maxPlayers ? hostPresence.maxPlayers : (isHost ? roomMaxPlayers : 5);
+        const currentMinPlayers = hostPresence && hostPresence.minPlayers ? hostPresence.minPlayers : (isHost ? roomMinPlayers : 2);
+
         const isMeTracked = players.some(p => p.clientId === myClientId);
         if (!isMeTracked) {
-            if (players.length >= 5) {
+            if (players.length >= currentMaxPlayers) {
                 Swal.fire({
                     background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
-                    title: 'Room Penuh!', html: 'Room ini sudah penuh (maksimal 5 pemain).',
+                    title: 'Room Penuh!', html: `Room ini sudah penuh (maksimal ${currentMaxPlayers} pemain).`,
                     icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
                 }).then(() => { cleanupMultiplayerSession(); backToMenu(); });
                 return;
@@ -1219,23 +1238,25 @@ function setupSupabaseChannel(code) {
                 clientId: myClientId,
                 username: myUsername,
                 role: isHost ? 'HOST' : 'TAMU',
-                online_at: new Date().toISOString()
+                online_at: new Date().toISOString(),
+                minPlayers: isHost ? roomMinPlayers : undefined,
+                maxPlayers: isHost ? roomMaxPlayers : undefined
             });
             return;
         }
 
         const myIdx = players.findIndex(p => p.clientId === myClientId);
-        if (myIdx >= 5) {
+        if (myIdx >= currentMaxPlayers) {
             Swal.fire({
                 background: '#0f1623', color: '#e5e7eb', confirmButtonColor: '#ef4444',
-                title: 'Room Penuh!', html: 'Room ini sudah penuh (maksimal 5 pemain).',
+                title: 'Room Penuh!', html: `Room ini sudah penuh (maksimal ${currentMaxPlayers} pemain).`,
                 icon: 'error', iconColor: '#ef4444', confirmButtonText: 'OK',
             }).then(() => { cleanupMultiplayerSession(); backToMenu(); });
             return;
         }
 
-        // Slice to active players only (max 5)
-        const activePlayers = players.slice(0, 5);
+        // Slice to active players only (max currentMaxPlayers)
+        const activePlayers = players.slice(0, currentMaxPlayers);
         roomPlayers = activePlayers;
 
         // Update lobby room player count in real-time
@@ -1245,7 +1266,7 @@ function setupSupabaseChannel(code) {
                 game: 'sudoku',
                 hostName: myUsername,
                 playerCount: activePlayers.length,
-                maxPlayers: 5,
+                maxPlayers: roomMaxPlayers,
                 updatedAt: new Date().toISOString()
             });
         }
@@ -1270,24 +1291,27 @@ function setupSupabaseChannel(code) {
         });
 
         // Determine connection status based on activePlayers
-        const otherPlayersCount = activePlayers.length - 1;
         if (isHost) {
-            if (otherPlayersCount > 0) {
-                setConnectionStatus('connected', `Terhubung (${activePlayers.length} Pemain)`);
+            if (activePlayers.length < currentMinPlayers) {
+                setConnectionStatus('waiting', `Menunggu teman... (${activePlayers.length}/${currentMinPlayers} Terhubung)`);
+                activeConnection = null;
+            } else {
+                setConnectionStatus('connected', `Terhubung (${activePlayers.length} Pemain - Siap!)`);
                 activeConnection = {
                     open: true,
                     close: () => {
                         cleanupMultiplayerSession();
                     }
                 };
-            } else {
-                setConnectionStatus('waiting', 'Menunggu teman bergabung...');
-                activeConnection = null;
             }
         } else {
             const hostPresent = activePlayers.some(p => p.role === 'HOST');
             if (hostPresent) {
-                setConnectionStatus('connected', `Terhubung (${activePlayers.length} Pemain)`);
+                if (activePlayers.length < currentMinPlayers) {
+                    setConnectionStatus('waiting', `Menunggu pemain... (${activePlayers.length}/${currentMinPlayers})`);
+                } else {
+                    setConnectionStatus('connected', `Terhubung (${activePlayers.length} Pemain)`);
+                }
                 activeConnection = {
                     open: true,
                     close: () => {
@@ -1369,6 +1393,16 @@ function createMultiplayerRoom() {
     isMultiplayer = true;
     isHost = true;
     
+    // Read co-op capacity settings
+    const minSelect = document.getElementById('coop-min-select');
+    const maxSelect = document.getElementById('coop-max-select');
+    roomMinPlayers = minSelect ? parseInt(minSelect.value) : 2;
+    roomMaxPlayers = maxSelect ? parseInt(maxSelect.value) : 5;
+    
+    // Hide co-op settings area
+    const coopSettings = document.getElementById('coop-settings-area');
+    if (coopSettings) coopSettings.classList.add('hidden');
+    
     // Hide create and join buttons, show room info
     btnCreate.classList.add('hidden');
     document.getElementById('join-room-area').classList.add('hidden');
@@ -1418,6 +1452,10 @@ function connectToMultiplayerRoom(hostId) {
     document.getElementById('btn-create-room').classList.add('hidden');
     document.getElementById('join-room-area').classList.add('hidden');
     document.getElementById('room-info-area').classList.remove('hidden');
+    
+    // Hide co-op settings area
+    const coopSettings = document.getElementById('coop-settings-area');
+    if (coopSettings) coopSettings.classList.add('hidden');
     document.getElementById('room-info-label').textContent = 'Terhubung ke Room:';
     
     // Extract short code from hostId (removing 'logicall-' prefix if present)
@@ -1673,6 +1711,17 @@ function updatePlayerListUI() {
     }
     
     listArea.classList.remove('hidden');
+    
+    // Update player list header text with limits
+    const hostPresence = roomPlayers.find(p => p.role === 'HOST');
+    const minVal = hostPresence && hostPresence.minPlayers ? hostPresence.minPlayers : (isHost ? roomMinPlayers : 2);
+    const maxVal = hostPresence && hostPresence.maxPlayers ? hostPresence.maxPlayers : (isHost ? roomMaxPlayers : 5);
+    
+    const titleEl = listArea.querySelector('span');
+    if (titleEl) {
+        titleEl.textContent = `Daftar Pemain (${roomPlayers.length}/${maxVal} - Min: ${minVal})`;
+    }
+    
     container.innerHTML = '';
     
     roomPlayers.forEach(p => {
@@ -2014,6 +2063,10 @@ function cleanupMultiplayerSession() {
     }
     document.getElementById('join-room-area').classList.remove('hidden');
     document.getElementById('room-info-area').classList.add('hidden');
+    
+    // Show co-op settings area again
+    const coopSettings = document.getElementById('coop-settings-area');
+    if (coopSettings) coopSettings.classList.remove('hidden');
     const shareBtn = document.getElementById('btn-share-lobby');
     if (shareBtn) {
         shareBtn.classList.add('hidden');
