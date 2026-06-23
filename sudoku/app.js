@@ -34,6 +34,9 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let isMultiplayer = false;
 let isHost = false;
 let roomChannel = null;
+let roomCode = "";
+let lobbyChannel = null;
+let isSharedToLobby = false;
 const myClientId = Math.random().toString(36).substring(2);
 let activeConnection = null;
 let remoteSelectedCell = null;
@@ -1144,7 +1147,8 @@ function sendToPeer(data) {
 }
 
 // Set up Supabase Realtime Channel (Broadcast & Presence)
-function setupSupabaseChannel(roomCode) {
+function setupSupabaseChannel(code) {
+    roomCode = code;
     if (roomChannel) {
         roomChannel.unsubscribe();
     }
@@ -1209,6 +1213,18 @@ function setupSupabaseChannel(roomCode) {
         // Slice to active players only (max 5)
         const activePlayers = players.slice(0, 5);
         roomPlayers = activePlayers;
+
+        // Update lobby room player count in real-time
+        if (isHost && isSharedToLobby && lobbyChannel) {
+            lobbyChannel.track({
+                roomCode: roomCode,
+                game: 'sudoku',
+                hostName: myUsername,
+                playerCount: activePlayers.length,
+                maxPlayers: 5,
+                updatedAt: new Date().toISOString()
+            });
+        }
 
         // --- CHECK IF HOST LEFT THE ROOM ---
         const hostPresent = activePlayers.some(p => p.role === 'HOST');
@@ -1318,7 +1334,7 @@ function createMultiplayerRoom() {
     
     setConnectionStatus('connecting', 'Membuka room...');
     
-    const roomCode = generateShortCode();
+    roomCode = generateShortCode();
     
     isMultiplayer = true;
     isHost = true;
@@ -1332,6 +1348,16 @@ function createMultiplayerRoom() {
     document.getElementById('player-role-badge').textContent = 'HOST';
     
     document.getElementById('share-link-input').value = roomCode;
+
+    // Reset share button to lobby state
+    isSharedToLobby = false;
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.remove('hidden');
+        shareBtn.disabled = false;
+        shareBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby';
+        shareBtn.className = "w-full py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1";
+    }
     
     setConnectionStatus('waiting', 'Menunggu teman bergabung...');
     
@@ -1361,11 +1387,16 @@ function connectToMultiplayerRoom(hostId) {
     document.getElementById('room-info-label').textContent = 'Terhubung ke Room:';
     
     // Extract short code from hostId (removing 'logicall-' prefix if present)
-    const roomCode = hostId.startsWith('logicall-') ? hostId.replace('logicall-', '') : hostId;
+    roomCode = hostId.startsWith('logicall-') ? hostId.replace('logicall-', '') : hostId;
     document.getElementById('share-link-input').value = roomCode;
     
     document.getElementById('player-role-badge').classList.remove('hidden');
     document.getElementById('player-role-badge').textContent = 'TAMU';
+
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.add('hidden');
+    }
     
     // Disable controls for Guest that only Host should own
     document.getElementById('difficulty-select').disabled = true;
@@ -1900,6 +1931,13 @@ function cleanupMultiplayerSession() {
         roomChannel.unsubscribe();
         roomChannel = null;
     }
+    if (lobbyChannel) {
+        lobbyChannel.unsubscribe();
+        lobbyChannel = null;
+    }
+    isSharedToLobby = false;
+    roomCode = "";
+    
     activeConnection = null;
     
     isMultiplayer = false;
@@ -1922,6 +1960,10 @@ function cleanupMultiplayerSession() {
     }
     document.getElementById('join-room-area').classList.remove('hidden');
     document.getElementById('room-info-area').classList.add('hidden');
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.add('hidden');
+    }
     
     // Re-enable Guest controls in case they are playing solo now
     document.getElementById('difficulty-select').disabled = false;
@@ -1960,4 +2002,43 @@ function triggerHardReload() {
         localStorage.removeItem('logicall_active_view');
         window.location.href = window.location.origin + window.location.pathname;
     }
+}
+
+function shareRoomToLobby() {
+    if (typeof supabase === 'undefined' || !supabaseClient || !roomCode || !isHost) return;
+
+    if (lobbyChannel) {
+        lobbyChannel.unsubscribe();
+        lobbyChannel = null;
+    }
+
+    lobbyChannel = supabaseClient.channel('arcade-lobby', {
+        config: {
+            presence: {
+                key: myClientId,
+            },
+        },
+    });
+
+    lobbyChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+            isSharedToLobby = true;
+            lobbyChannel.track({
+                roomCode: roomCode,
+                game: 'sudoku',
+                hostName: myUsername,
+                playerCount: roomPlayers.length || 1,
+                maxPlayers: 5,
+                updatedAt: new Date().toISOString()
+            });
+
+            const shareBtn = document.getElementById('btn-share-lobby');
+            if (shareBtn) {
+                shareBtn.disabled = true;
+                shareBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Telah Dibagikan';
+                shareBtn.className = "w-full py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-600/20 rounded text-[10px] font-bold cursor-not-allowed flex items-center justify-center gap-1";
+            }
+            alert("Room berhasil dibagikan ke Lobby!");
+        }
+    });
 }

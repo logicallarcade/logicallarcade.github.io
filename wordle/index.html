@@ -113,6 +113,10 @@
                         <span id="room-code-display" class="text-sm text-emerald-400 font-black tracking-widest">-</span>
                     </div>
                     <div class="flex gap-2">
+                        <!-- Share Room to Lobby -->
+                        <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="hidden px-3 py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby
+                        </button>
                         <button onclick="copyRoomCode()" id="btn-copy-code" class="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-600/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
                             <i class="fa-solid fa-copy"></i> Salin
                         </button>

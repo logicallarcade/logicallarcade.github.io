@@ -12,8 +12,11 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Custom Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=1.1.0">
+    <link rel="stylesheet" href="style.css?v=1.2.0">
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -78,197 +81,89 @@
     </header>
 
     <!-- Main Container -->
-    <main class="relative z-10 flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-12 flex flex-col justify-center animate-fade-in">
+    <main class="relative z-10 flex-grow max-w-6xl w-full mx-auto px-4 py-6 md:py-10 animate-fade-in">
         
-        <!-- ================= LANDING PAGE SECTION (FRIV GRID) ================= -->
-        <section id="menu-view" class="w-full flex flex-col items-center">
-            
-            <!-- Hero Title -->
-            <div class="text-center mb-10 max-w-2xl">
-                <span class="px-3 py-1 rounded-full text-xs font-semibold tracking-wider text-brandPurple bg-brandPurple/10 border border-brandPurple/20 uppercase">
-                    PILIH PERMAINAN
-                </span>
-                <h2 class="text-3xl md:text-5xl font-black mt-3 mb-4 tracking-tight leading-none bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent">
-                    Arena Otak & Logika Minimalis
-                </h2>
-                <p class="text-gray-400 text-sm md:text-base leading-relaxed">
-                    Mainkan game Sudoku interaktif premium secara langsung, atau uji kemampuan tebak kata Anda di Wordle Bahasa Indonesia yang menantang.
-                </p>
-            </div>
+        <!-- Two-column layout: Games (left) + Lobby (right) -->
+        <div class="flex flex-col lg:flex-row gap-6 items-start w-full">
 
-            <!-- Friv-Style Grid Layout -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5 w-full max-w-4xl px-2 grid-flow-row-dense">
-                
-                <!-- Card 1: Tic Tac Toe (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Tic Tac Toe')">
-                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-all">
-                        <i class="fa-solid fa-xmark text-cyan-400 text-xl"></i>
+            <!-- ========== LEFT: GAME CARDS ========== -->
+            <div class="w-full lg:w-auto lg:flex-shrink-0 flex flex-col gap-4">
+
+                <!-- Wordle Card -->
+                <div class="friv-card wordle-promo-card cursor-pointer group flex flex-row items-center gap-5 p-5 lg:w-72"
+                     onclick="window.location.href='./wordle/'">
+                    <div class="w-14 h-14 flex-shrink-0 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center group-hover:bg-emerald-500/20 transition-all shadow-lg shadow-emerald-500/10">
+                        <i class="fa-solid fa-font text-emerald-400 text-2xl"></i>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Tic Tac Toe</h3>
-                        <p class="text-xs text-cyan-400/80 font-medium">Asah Taktik</p>
+                    <div class="flex-1 min-w-0">
+                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-widest block w-max mb-1">Main Sekarang</span>
+                        <h2 class="font-black text-xl text-white group-hover:text-emerald-400 transition-colors tracking-tight">Wordle</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Tebak kata 5 huruf Bahasa Indonesia</p>
                     </div>
+                    <i class="fa-solid fa-arrow-right text-gray-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all flex-shrink-0"></i>
                 </div>
 
-                <!-- Card 2: Snake (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Snake')">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all">
-                        <i class="fa-solid fa-shuttle-space text-emerald-400 text-lg"></i>
+                <!-- Sudoku Card -->
+                <div class="friv-card sudoku-promo-card cursor-pointer group relative overflow-hidden p-5 lg:w-72"
+                     onclick="window.location.href='./sudoku/'">
+                    <!-- Decorative BG Grid -->
+                    <div class="absolute right-[-10px] top-[-10px] opacity-10 w-36 h-36 grid grid-cols-3 gap-0.5 pointer-events-none transform rotate-12 transition-transform duration-700 group-hover:rotate-[24deg] group-hover:scale-110">
+                        <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
+                        <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
+                        <div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div><div class="bg-brandPurple rounded-sm"></div>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Retro Snake</h3>
-                        <p class="text-xs text-emerald-400/80 font-medium">Klasik Kuno</p>
-                    </div>
-                </div>
-
-                <!-- Card 3: Chess (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Chess')">
-                    <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:bg-amber-500/20 transition-all">
-                        <i class="fa-solid fa-chess-knight text-amber-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Chess</h3>
-                        <p class="text-xs text-amber-400/80 font-medium">Ahli Strategi</p>
-                    </div>
-                </div>
-
-                <!-- Card 4: Minesweeper (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Minesweeper')">
-                    <div class="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center border border-rose-500/20 group-hover:bg-rose-500/20 transition-all">
-                        <i class="fa-solid fa-bomb text-rose-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Minesweeper</h3>
-                        <p class="text-xs text-rose-400/80 font-medium">Awas Meledak</p>
-                    </div>
-                </div>
-
-                <!-- Card 5: Wordle (ACTIVE - Highlighted in Emerald) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group wordle-promo-card" onclick="window.location.href='./wordle/'">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-all">
-                        <i class="fa-solid fa-font text-emerald-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-widest block w-max mb-1">Main</span>
-                        <h3 class="font-bold text-base text-white group-hover:text-emerald-400 transition-colors">Wordle</h3>
-                        <p class="text-xs text-gray-400 font-medium">Tebak Bahasa Indonesia</p>
-                    </div>
-                </div>
-
-                <!-- ================= FEATURED: SUDOKU PRO (ACTIVE - 2x2 Grid) ================= -->
-                <div class="friv-card col-span-2 row-span-1 sm:row-span-2 p-6 flex flex-col justify-between group sudoku-promo-card relative overflow-hidden aspect-auto sm:aspect-square min-h-[160px] sm:min-h-[220px]" onclick="window.location.href='./sudoku/'">
-                    <!-- Decorative BG Graphic for Sudoku Grid representation -->
-                    <div class="absolute right-[-10px] top-[-10px] opacity-15 w-44 h-44 grid grid-cols-3 gap-0.5 pointer-events-none transform rotate-12 transition-transform duration-700 group-hover:rotate-[24deg] group-hover:scale-110">
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                        <div class="bg-brandPurple border border-gray-900 rounded-sm"></div>
-                    </div>
-
-                    <div class="flex items-start justify-between">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30 border border-brandPurple/50">
-                            <i class="fa-solid fa-grid-3x3 text-white text-3xl"></i>
+                    <div class="relative z-10 flex flex-row items-center gap-5">
+                        <div class="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30 border border-brandPurple/50">
+                            <i class="fa-solid fa-grid-3x3 text-white text-2xl"></i>
                         </div>
-                        <span class="bg-brandPurple/20 text-brandPurple border border-brandPurple/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest animate-pulse">
-                            Main Sekarang
-                        </span>
-                    </div>
-
-                    <div class="mt-4 sm:mt-8 z-10">
-                        <span class="text-xs text-brandIndigo font-bold tracking-wider uppercase block mb-1">Game Utama</span>
-                        <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight group-hover:text-brandPurple transition-colors duration-300">
-                            SUDOKU PRO
-                        </h3>
-                        <p class="hidden sm:block text-xs text-gray-400 mt-2 leading-relaxed max-w-[280px]">
-                            Latih otak dengan teka-teki Sudoku dari level Easy hingga Expert. Nikmati fitur lengkap Notes, Auto-validation, Hint, dan Undo/Redo secara multiplayer.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Card 6: Tetris (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Block Puzzle')">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500/20 transition-all">
-                        <i class="fa-solid fa-cubes text-indigo-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Block Puzzle</h3>
-                        <p class="text-xs text-indigo-400/80 font-medium">Tata Balok</p>
-                    </div>
-                </div>
-
-                <!-- Card 7: Pac-Man (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Ghost Hunter')">
-                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20 group-hover:bg-yellow-500/20 transition-all">
-                        <i class="fa-solid fa-circle-dot text-yellow-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Ghost Hunter</h3>
-                        <p class="text-xs text-yellow-400/80 font-medium">Kejar Monster</p>
-                    </div>
-                </div>
-
-                <!-- Card 8: 2048 (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('2048')">
-                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20 group-hover:bg-orange-500/20 transition-all">
-                        <i class="fa-solid fa-calculator text-orange-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">2048 Grid</h3>
-                        <p class="text-xs text-orange-400/80 font-medium">Gabung Angka</p>
-                    </div>
-                </div>
-
-                <!-- Card 9: Space Invaders (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Alien Attack')">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center border border-purple-500/20 group-hover:bg-purple-500/20 transition-all">
-                        <i class="fa-solid fa-ghost text-purple-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Alien Attack</h3>
-                        <p class="text-xs text-purple-400/80 font-medium">Tembak Invasi</p>
-                    </div>
-                </div>
-
-                <!-- Card 10: Pinball (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Sling Ball')">
-                    <div class="w-10 h-10 rounded-lg bg-fuchsia-500/10 flex items-center justify-center border border-fuchsia-500/20 group-hover:bg-fuchsia-500/20 transition-all">
-                        <i class="fa-solid fa-circle-notch text-fuchsia-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Sling Ball</h3>
-                        <p class="text-xs text-fuchsia-400/80 font-medium">Pinball Klasik</p>
-                    </div>
-                </div>
-
-                <!-- Card 11: Memory Match (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Brain Match')">
-                    <div class="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center border border-pink-500/20 group-hover:bg-pink-500/20 transition-all">
-                        <i class="fa-solid fa-clone text-pink-400 text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Brain Match</h3>
-                        <p class="text-xs text-pink-400/80 font-medium">Cari Pasangan</p>
-                    </div>
-                </div>
-
-                <!-- Card 12: Brick Breaker (Coming Soon) -->
-                <div class="friv-card aspect-square flex flex-col justify-between p-4 group" onclick="showComingSoon('Brick Breaker')">
-                    <div class="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-500/20 group-hover:bg-teal-500/20 transition-all">
-                        <i class="fa-solid fa-square-full text-teal-400 text-xs"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-white">Brick Breaker</h3>
-                        <p class="text-xs text-teal-400/80 font-medium">Hancurkan Dinding</p>
+                        <div class="flex-1 min-w-0">
+                            <span class="bg-brandPurple/20 text-brandPurple border border-brandPurple/30 text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-widest block w-max mb-1 animate-pulse">Game Utama</span>
+                            <h2 class="font-black text-xl text-white group-hover:text-brandPurple transition-colors tracking-tight">Sudoku Pro</h2>
+                            <p class="text-xs text-gray-400 mt-0.5">Multiplayer co-op hingga 5 pemain</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right text-gray-600 group-hover:text-brandPurple group-hover:translate-x-1 transition-all flex-shrink-0"></i>
                     </div>
                 </div>
 
             </div>
-        </section>
+
+            <!-- ========== RIGHT: LOBBY PANEL ========== -->
+            <div class="w-full flex-1 flex flex-col glass-panel rounded-2xl border border-gray-800/80 overflow-hidden" style="min-height: 340px;">
+                
+                <!-- Lobby Header -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800/70 bg-gray-900/30">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-brandPurple/20 flex items-center justify-center">
+                            <i class="fa-solid fa-tower-broadcast text-brandPurple text-xs"></i>
+                        </div>
+                        <span class="text-sm font-bold text-white tracking-tight">Lobby Room Aktif</span>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="lobby-online-count">0</span> Online
+                    </span>
+                </div>
+
+                <!-- Rooms Scrollable Container -->
+                <div id="lobby-rooms-container" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3" style="max-height: 480px;">
+                    <!-- Fallback empty message (replaced by JS) -->
+                    <div class="flex-1 flex flex-col items-center justify-center py-10 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-800/60 flex items-center justify-center mb-3 border border-gray-700/30">
+                            <i class="fa-solid fa-gamepad text-gray-600 text-lg"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm font-medium">Belum ada room yang dibagikan</p>
+                        <p class="text-gray-500 text-xs mt-1 max-w-[240px] leading-relaxed">Buat room multiplayer di Sudoku atau Wordle, lalu klik "Bagikan ke Lobby"!</p>
+                    </div>
+                </div>
+
+                <!-- Lobby Footer hint -->
+                <div class="px-4 py-2.5 border-t border-gray-800/50 bg-gray-900/20 text-[10px] text-gray-500 text-center">
+                    Room akan hilang otomatis saat host keluar atau game dimulai
+                </div>
+
+            </div>
+
+        </div><!-- end two-column layout -->
     </main>
 
     <!-- Footer -->

@@ -22,6 +22,8 @@ let isAnimating = false;
 let isMultiplayer = false;
 let isHost = false;
 let roomChannel = null;
+let lobbyChannel = null;
+let isSharedToLobby = false;
 let roomCode = "";
 let opponentGuesses = [];
 let myClientId = Math.random().toString(36).substring(2, 9);
@@ -665,6 +667,16 @@ async function createVersusRoom() {
     document.getElementById('room-info-area').classList.remove('hidden');
     document.getElementById('player-list-area').classList.remove('hidden');
     
+    // Reset share button to lobby state
+    isSharedToLobby = false;
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.remove('hidden');
+        shareBtn.disabled = false;
+        shareBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby';
+        shareBtn.className = "px-3 py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1";
+    }
+    
     // Show opponent board
     document.getElementById('opponent-board-wrapper').classList.remove('hidden');
     document.getElementById('opponent-board-wrapper').classList.add('flex');
@@ -705,6 +717,10 @@ function transitionUIForGuest() {
     document.getElementById('btn-create-room').classList.add('hidden');
     document.getElementById('join-room-area').classList.add('hidden');
     document.getElementById('room-info-area').classList.remove('hidden');
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.add('hidden');
+    }
     document.getElementById('btn-copy-code').classList.remove('hidden');
     document.getElementById('btn-start-versus').classList.add('hidden'); // Guest can't start
     document.getElementById('player-list-area').classList.remove('hidden');
@@ -725,6 +741,11 @@ function leaveVersusRoom(quiet = false) {
         supabaseClient.removeChannel(roomChannel);
         roomChannel = null;
     }
+    if (lobbyChannel) {
+        supabaseClient.removeChannel(lobbyChannel);
+        lobbyChannel = null;
+    }
+    isSharedToLobby = false;
     
     isMultiplayer = false;
     isHost = false;
@@ -740,6 +761,10 @@ function leaveVersusRoom(quiet = false) {
     document.getElementById('btn-create-room').classList.remove('hidden');
     document.getElementById('join-room-area').classList.remove('hidden');
     document.getElementById('room-info-area').classList.add('hidden');
+    const shareBtn = document.getElementById('btn-share-lobby');
+    if (shareBtn) {
+        shareBtn.classList.add('hidden');
+    }
     document.getElementById('player-list-area').classList.add('hidden');
     document.getElementById('room-code-input').value = "";
     
@@ -825,6 +850,45 @@ function setupSupabaseVersus() {
     });
 }
 
+function shareRoomToLobby() {
+    if (typeof supabase === 'undefined' || !supabaseClient || !roomCode || !isHost) return;
+
+    if (lobbyChannel) {
+        supabaseClient.removeChannel(lobbyChannel);
+        lobbyChannel = null;
+    }
+
+    lobbyChannel = supabaseClient.channel('arcade-lobby', {
+        config: {
+            presence: {
+                key: myClientId,
+            },
+        },
+    });
+
+    lobbyChannel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+            isSharedToLobby = true;
+            lobbyChannel.track({
+                roomCode: roomCode,
+                game: 'wordle',
+                hostName: myUsername,
+                playerCount: 1,
+                maxPlayers: 2,
+                updatedAt: new Date().toISOString()
+            });
+
+            const shareBtn = document.getElementById('btn-share-lobby');
+            if (shareBtn) {
+                shareBtn.disabled = true;
+                shareBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Telah Dibagikan';
+                shareBtn.className = "px-3 py-1.5 bg-emerald-600/20 text-emerald-400 border border-emerald-600/20 rounded text-[10px] font-bold cursor-not-allowed flex items-center justify-center gap-1";
+            }
+            showToast("Room berhasil dibagikan ke Lobby!");
+        }
+    });
+}
+
 function handlePresenceSync(presenceState) {
     const players = [];
     let opponentFound = false;
@@ -873,6 +937,18 @@ function handlePresenceSync(presenceState) {
 
     // Slice to active players only (max 2)
     const activePlayers = players.slice(0, 2);
+
+    // Update lobby room player count in real-time
+    if (isHost && isSharedToLobby && lobbyChannel) {
+        lobbyChannel.track({
+            roomCode: roomCode,
+            game: 'wordle',
+            hostName: myUsername,
+            playerCount: activePlayers.length,
+            maxPlayers: 2,
+            updatedAt: new Date().toISOString()
+        });
+    }
 
     // --- CHECK IF HOST LEFT THE ROOM ---
     if (!isHost && activePlayers.length > 0 && !activePlayers.some(p => p.role === 'host')) {
@@ -982,6 +1058,12 @@ async function startVersusGame() {
 }
 
 function startLocalVersusGame(word) {
+    if (lobbyChannel) {
+        supabaseClient.removeChannel(lobbyChannel);
+        lobbyChannel = null;
+    }
+    isSharedToLobby = false;
+
     secretWord = word;
     currentRow = 0;
     currentTile = 0;
