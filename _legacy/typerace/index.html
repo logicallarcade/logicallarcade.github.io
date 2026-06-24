@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type Race - Logicall</title>
+    <meta name="description" content="Mainkan game mengetik cepat Type Race versi Bahasa Indonesia. Balapan mengetik secara solo melawan bot atau multiplayer real-time bersama teman!">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌨️</text></svg>">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css?v=1.0.0">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deep: '#0b0f17',
+                        slateCard: 'rgba(30, 41, 59, 0.4)',
+                        brandAmber: '#f59e0b',
+                        brandGold: '#d97706',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-200">
+
+    <!-- Global Grid Background Effect -->
+    <div class="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Header Section -->
+    <header class="relative z-10 px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="backToMenu()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-600/30">
+                    <i class="fa-solid fa-gamepad text-base sm:text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-amber-200 to-amber-400">
+                        Logicall
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] tracking-widest text-amber-400 font-semibold uppercase -mt-1">
+                        ARCADE PORTAL
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                <!-- Username Input (Global) -->
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
+                    <i class="fa-solid fa-user text-amber-400 text-[10px] sm:text-xs"></i>
+                    <input type="text" id="global-username-input" placeholder="Nama" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-[10px] sm:text-xs text-white font-semibold focus:outline-none w-14 sm:w-28">
+                </div>
+
+                <!-- Refresh / Reload Page -->
+                <button onclick="window.location.reload(true)" title="Refresh Halaman" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-500/50 flex items-center justify-center transition-all duration-300 group">
+                    <i class="fa-solid fa-arrows-rotate text-amber-400 text-sm group-hover:rotate-180 transition-transform duration-500"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Game Header Bar Controls -->
+    <section class="relative z-10 max-w-3xl w-full mx-auto px-4 mt-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+            <div class="flex items-center gap-3">
+                <button onclick="backToMenu()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-gray-800/80 border border-gray-700 hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                </button>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        Type Race
+                    </h2>
+                    <p class="text-xs text-gray-400">Balapan mengetik cepat Bahasa Indonesia</p>
+                </div>
+            </div>
+
+            <!-- Stats/Badges inline to match portal styling -->
+            <div class="flex items-center justify-between sm:justify-end gap-2.5 text-xs">
+                <!-- Connection Status Badge -->
+                <div id="connection-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-400 shadow-inner h-[38px]">
+                    <span id="connection-status-dot" class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="connection-status-text">Mode Solo</span>
+                </div>
+                <!-- Restart button -->
+                <button onclick="confirmRestartGame()" title="Ulangi Permainan Baru" class="w-9 h-9 rounded-lg border border-amber-500/20 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-500/40 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-arrow-rotate-right text-amber-400 text-sm"></i>
+                </button>
+                <!-- Stats Trigger -->
+                <button onclick="toggleStatsModal(true)" title="Statistik Saya" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-chart-simple text-gray-400 hover:text-white text-sm"></i>
+                </button>
+                <!-- Help/About button -->
+                <button onclick="toggleHelpModal(true)" title="Cara Bermain" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-circle-info text-gray-400 hover:text-white text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multiplayer & Room Setup Panel (Lobi Versus) -->
+    <section class="relative z-10 max-w-3xl w-full mx-auto px-4 mt-4">
+        <div class="glass-panel rounded-2xl p-4 border border-gray-800/80 flex flex-col gap-3">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-800/50">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    Lobi Type Race Versus
+                </span>
+                <span id="player-role-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wide">HOST</span>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="lobby-creation-controls">
+                    <!-- Host / Create Room Area -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="room-max-select" class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Kapasitas Room</label>
+                        <div class="flex gap-2">
+                            <select id="room-max-select" class="bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-amber-500 focus:outline-none transition font-semibold flex-1">
+                                <option value="2">2 Pemain</option>
+                                <option value="3">3 Pemain</option>
+                                <option value="4" selected>4 Pemain</option>
+                                <option value="6">6 Pemain</option>
+                                <option value="8">8 Pemain</option>
+                            </select>
+                            <button onclick="createVersusRoom()" id="btn-create-room" class="px-4 py-1.5 bg-slate-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-xs font-bold text-white transition active:scale-95 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-users text-amber-400"></i> Buat Room
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Join input & button -->
+                    <div id="join-room-area" class="flex flex-col gap-1.5">
+                        <label for="room-code-input" class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Gabung Room Lain</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="room-code-input" placeholder="Masukkan Kode Room" class="flex-1 bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-amber-500 focus:outline-none transition font-semibold">
+                            <button onclick="joinVersusRoomByCode()" id="btn-join-room" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-500 rounded-lg text-xs font-bold text-white transition active:scale-95">Gabung</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info area when room is open (Host / Guest) -->
+                <div id="room-info-area" class="hidden flex flex-col gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-gray-800">
+                    <p id="room-info-label" class="text-[10px] text-gray-400 leading-tight">Undang Teman Anda:</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="share-link-input" readonly class="flex-grow bg-slate-950 border border-gray-850 text-[10px] rounded px-2 py-1 text-gray-300 font-bold focus:outline-none select-all text-center">
+                        <button onclick="copyRoomCode()" class="px-3 py-1 bg-slate-850 hover:bg-slate-800 border border-gray-700 rounded text-[10px] font-bold text-gray-300 transition active:scale-95">Salin Kode</button>
+                        <button onclick="copyRoomLink()" id="btn-copy-link" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 rounded text-[10px] font-bold text-white transition active:scale-95">Salin Link</button>
+                    </div>
+                    <div class="flex gap-2 mt-1">
+                        <!-- Share Room to Lobby -->
+                        <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="flex-1 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby Portal
+                        </button>
+                        <!-- Start Game Button (Host only) -->
+                        <button onclick="startVersusGame()" id="btn-start-versus" class="hidden flex-1 py-2 bg-amber-600 hover:bg-amber-500 rounded text-[10px] font-bold text-white transition active:scale-95">
+                            Mulai Game Balapan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Players List Area -->
+                <div id="player-list-area" class="hidden flex flex-col gap-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-gray-800">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Daftar Pemain</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300 font-medium mb-1.5" id="player-list-container">
+                        <!-- JS will dynamically populate players list -->
+                    </div>
+                    <button onclick="leaveVersusRoom()" id="btn-leave-room" class="w-full py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Room
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main id="main-container" class="relative z-10 flex-grow w-full max-w-3xl mx-auto px-4 py-4 sm:py-6 flex flex-col justify-center gap-4 sm:gap-6 transition-all duration-300">
+        
+        <!-- SOLO SETTINGS PANEL (Bot config when in solo mode) -->
+        <div id="solo-settings-area" class="glass-panel rounded-2xl p-4 border border-gray-800/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex flex-col">
+                <span class="text-xs font-bold text-amber-400">Mode Balapan Solo</span>
+                <span class="text-[10px] text-gray-500">Sesuaikan jumlah lawan komputer (Bot) yang menantang Anda.</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 bg-slate-900 border border-gray-700/80 rounded-xl px-2 py-1">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase mr-1">Lawan Bot:</span>
+                    <select id="bot-count-select" onchange="adjustBotCount(this.value)" class="bg-transparent border-none text-xs text-white focus:outline-none font-bold">
+                        <option value="1">1 Bot</option>
+                        <option value="2" selected>2 Bot</option>
+                        <option value="3">3 Bot</option>
+                    </select>
+                </div>
+                <button onclick="startSoloGame()" id="btn-start-solo" class="py-2 px-4 text-xs font-bold bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-95 text-white rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20">
+                    <i class="fa-solid fa-play"></i> Mulai Balapan Solo
+                </button>
+            </div>
+        </div>
+
+        <!-- RACER TRACKS (Visual Balapan) -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-gray-800/80 flex flex-col gap-3.5 relative overflow-hidden">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block border-b border-gray-800 pb-1.5 mb-1.5">Papan Balapan (Lintasan)</span>
+            
+            <div id="tracks-container" class="flex flex-col gap-3.5 w-full">
+                <!-- Tracks will be generated dynamically here by JS. E.g.
+                <div class="track-row">
+                    <span class="track-name">Pemain 1</span>
+                    <div class="track-lane">
+                        <div class="racer-car" style="left: 0%"><i class="fa-solid fa-car-side text-amber-400"></i></div>
+                    </div>
+                </div>
+                -->
+                <!-- Placeholder when idle -->
+                <div class="flex flex-col items-center justify-center py-6 text-center text-gray-500">
+                    <i class="fa-solid fa-flag-checkered text-3xl mb-2 text-gray-700"></i>
+                    <p class="text-xs">Tekan "Mulai" untuk memulai balapan mengetik!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYING BOARD: TEXT PASSAGE AND INPUT -->
+        <div id="gameplay-area" class="glass-panel rounded-2xl p-4 sm:p-6 border border-gray-800/80 flex flex-col gap-4 relative overflow-hidden">
+            
+            <!-- STAGE INFO / COUNTDOWN -->
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ketik Paragraf Berikut:</span>
+                <div id="timer-badge" class="px-2.5 py-1 rounded bg-slate-900 border border-gray-800 text-[10px] font-bold text-amber-400">
+                    Sisa Waktu: <span id="timer-display">--</span>s
+                </div>
+            </div>
+
+            <!-- text passage to type -->
+            <div id="passage-container" class="text-gray-300 text-sm sm:text-base leading-relaxed p-3.5 sm:p-5 rounded-xl bg-slate-950/70 border border-gray-800/80 font-mono tracking-wide select-none min-h-[80px]">
+                Silakan mulai game balapan solo atau buat/gabung room untuk bermain bersama teman. Teks acak akan muncul di sini saat permainan dimulai.
+            </div>
+
+            <!-- input box and submit mechanism -->
+            <div class="flex flex-col gap-2 relative">
+                <input type="text" id="typing-input" disabled placeholder="Menunggu balapan dimulai..." class="w-full bg-slate-900 border border-gray-700 rounded-xl px-4 py-3 text-sm sm:text-base text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition font-mono tracking-wide placeholder-gray-600">
+                
+                <!-- Countdown Overlay Visual -->
+                <div id="countdown-overlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl flex items-center justify-center text-center p-2 z-20 transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="flex gap-2" id="countdown-dots">
+                            <span class="w-3.5 h-3.5 rounded-full bg-gray-700" id="dot-1"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-gray-700" id="dot-2"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-gray-700" id="dot-3"></span>
+                        </div>
+                        <span class="text-sm font-extrabold text-white uppercase tracking-wider" id="countdown-text">Bersiap...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REAL-TIME METRICS DASHBOARD -->
+            <div class="grid grid-cols-3 gap-3 text-center mt-1">
+                <div class="p-2 rounded-xl bg-slate-900/60 border border-gray-800/80">
+                    <span id="metric-wpm" class="text-base sm:text-lg font-black text-amber-400 font-mono">0</span>
+                    <span class="text-[8px] text-gray-500 uppercase font-bold tracking-wider block">WPM (Kata/Mnt)</span>
+                </div>
+                <div class="p-2 rounded-xl bg-slate-900/60 border border-gray-800/80">
+                    <span id="metric-cpm" class="text-base sm:text-lg font-black text-amber-400 font-mono">0</span>
+                    <span class="text-[8px] text-gray-500 uppercase font-bold tracking-wider block">CPM (Karakter/Mnt)</span>
+                </div>
+                <div class="p-2 rounded-xl bg-slate-900/60 border border-gray-800/80">
+                    <span id="metric-progress" class="text-base sm:text-lg font-black text-white font-mono">0%</span>
+                    <span class="text-[8px] text-gray-500 uppercase font-bold tracking-wider block">Selesai</span>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-5 text-center text-xs text-gray-500 border-t border-gray-800/40 glass-panel bg-gray-900/10">
+        <p>&copy; 2026 Logicall Type Race.</p>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. CARA BERMAIN MODAL (HELP) -->
+    <div id="help-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-2xl p-6 border border-gray-800/80 shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-amber-400"></i> Cara Bermain Type Race
+                </h3>
+                <button onclick="toggleHelpModal(false)" class="text-gray-500 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="text-xs text-gray-400 space-y-4 leading-relaxed overflow-y-auto pr-1">
+                <p class="font-semibold text-gray-300">Aturan Dasar:</p>
+                <ul class="list-disc list-inside space-y-1.5 pl-1">
+                    <li>Ketik kalimat bahasa Indonesia yang ditampilkan di layar kata demi kata.</li>
+                    <li>Gunakan <strong>keyboard bawaan</strong> perangkat Anda (PC / HP).</li>
+                    <li>Setelah mengetik suatu kata secara lengkap dan benar, tekan tombol <kbd class="px-1.5 py-0.5 rounded bg-gray-850 text-white font-mono text-[9px] border border-gray-700">Spasi</kbd> untuk berpindah ke kata berikutnya.</li>
+                    <li>Khusus kata terakhir di ujung kalimat, tidak perlu menekan spasi untuk menyelesaikan permainan.</li>
+                </ul>
+
+                <hr class="border-gray-800">
+
+                <div>
+                    <h4 class="font-bold text-gray-300 mb-2">Penanda Visual Teks:</h4>
+                    
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-2 py-0.5 font-mono text-xs rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Hijau</span>
+                            <span class="text-gray-400">Huruf/kata yang berhasil diketik dengan benar.</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-2 py-0.5 font-mono text-xs rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Merah</span>
+                            <span class="text-gray-400">Kesalahan ketik (Typo). Perbaiki dahulu dengan backspace!</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <span class="px-2 py-0.5 font-mono text-xs rounded bg-amber-500/15 text-amber-400 border border-amber-500/20 border-b-2">Garis Bawah</span>
+                            <span class="text-gray-400">Huruf atau kata yang sedang aktif diketik saat ini.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-800">
+
+                <p class="text-[10px] text-gray-500 italic bg-slate-900/40 p-2.5 rounded border border-gray-850">
+                    Catatan Kecepatan: WPM dihitung berdasarkan 5 karakter per kata. Semakin cepat Anda mengetik dengan akurat, semakin cepat mobil Anda melaju menuju garis finis!
+                </p>
+            </div>
+            
+            <button onclick="toggleHelpModal(false)" class="w-full mt-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs tracking-wider transition uppercase shadow-md">
+                Mengerti & Main
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. STATISTIK MODAL (WIN/LOSE DISPLAY) -->
+    <div id="stats-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 border border-amber-500/30 shadow-2xl flex flex-col items-center text-center">
+            
+            <!-- Result Title -->
+            <div id="stats-title-area" class="mb-4">
+                <span id="game-status-badge" class="text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest block w-max mx-auto mb-2 bg-amber-500/20 text-amber-400 border border-amber-500/30">STATISTIK</span>
+                <h3 id="stats-main-title" class="text-2xl font-black text-white tracking-tight">Hasil Balapan Mengetik</h3>
+            </div>
+
+            <!-- Stats Block -->
+            <div class="grid grid-cols-4 gap-2 w-full mb-6 text-center">
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-played" class="text-base sm:text-lg font-black text-white">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Balapan</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-avg-wpm" class="text-base sm:text-lg font-black text-amber-400">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Rata WPM</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-max-wpm" class="text-base sm:text-lg font-black text-yellow-400">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Max WPM</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-max-cpm" class="text-base sm:text-lg font-black text-white">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Max CPM</span>
+                </div>
+            </div>
+
+            <!-- Game specific results (shown only on game finished) -->
+            <div id="answer-reveal-area" class="w-full p-4 rounded-xl bg-slate-900 border border-gray-800 mb-6 flex flex-col gap-2 text-left">
+                <span class="text-[9px] font-bold uppercase text-gray-500 tracking-wider text-center block mb-1">Hasil Performa Terakhir</span>
+                <div class="flex justify-between text-xs py-1 border-b border-gray-800">
+                    <span class="text-gray-400">Posisi Akhir:</span>
+                    <strong class="text-white" id="last-rank">-</strong>
+                </div>
+                <div class="flex justify-between text-xs py-1 border-b border-gray-800">
+                    <span class="text-gray-400">Kecepatan Mengetik:</span>
+                    <strong class="text-amber-400" id="last-wpm">0 WPM / 0 CPM</strong>
+                </div>
+                <div class="flex justify-between text-xs py-1 border-b border-gray-800">
+                    <span class="text-gray-400">Waktu Tempuh:</span>
+                    <strong class="text-white" id="last-time">0 detik</strong>
+                </div>
+                <div class="flex justify-between text-xs py-1">
+                    <span class="text-gray-400">Akurasi:</span>
+                    <strong class="text-emerald-400" id="last-accuracy">0%</strong>
+                </div>
+            </div>
+
+            <!-- Leaderboard / Podium area (if multiplayer or bots list) -->
+            <div id="podium-area" class="w-full mb-6 text-left hidden">
+                <span class="text-[9px] font-bold uppercase text-gray-400 tracking-widest block mb-2">Klasemen Balapan</span>
+                <div class="flex flex-col gap-1.5" id="podium-list-container">
+                    <!-- Dynamic ranking row -->
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 w-full">
+                <button id="btn-stats-left" onclick="handleStatsLeftClick()" class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-bold text-xs tracking-wider transition uppercase active:scale-98">
+                    Tutup
+                </button>
+                <button id="btn-restart-game" onclick="restartGame()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-95 text-white font-bold text-xs tracking-wider transition uppercase shadow-lg shadow-amber-500/20 active:scale-98">
+                    Main Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js?v=1.0.0"></script>
+</body>
+</html>

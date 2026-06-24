@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logicall - Portal Game Minimalis & Sudoku</title>
+    <meta name="description" content="Portal game minimalis modern dengan game Sudoku interaktif terlengkap. Pilih tingkat kesulitan Anda dan pecahkan rekor waktu terbaik!">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css?v=1.7.0">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deep: '#0b0f17',
+                        slateCard: 'rgba(30, 41, 59, 0.4)',
+                        brandPurple: '#8b5cf6',
+                        brandIndigo: '#6366f1',
+                        brandGold: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-200">
+
+    <!-- Global Grid Background Effect -->
+    <div class="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+    <!-- Header Section -->
+    <header class="relative z-10 px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="backToMenu()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brandPurple to-brandIndigo flex items-center justify-center shadow-lg shadow-brandPurple/30">
+                    <i class="fa-solid fa-gamepad text-base sm:text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-brandPurple">
+                        Logicall
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] tracking-widest text-brandPurple font-semibold uppercase -mt-1">
+                        ARCADE PORTAL
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                <!-- Username Input (Global) -->
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
+                    <i class="fa-solid fa-user text-brandPurple text-[10px] sm:text-xs"></i>
+                    <input type="text" id="global-username-input" placeholder="Nama" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-[10px] sm:text-xs text-white font-semibold focus:outline-none w-14 sm:w-28">
+                </div>
+
+
+                <!-- Refresh / Reload Page -->
+                <button onclick="window.location.reload(true)" title="Refresh Halaman" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-brandPurple/30 bg-brandPurple/10 hover:bg-brandPurple/20 hover:border-brandPurple/50 flex items-center justify-center transition-all duration-300 group">
+                    <i class="fa-solid fa-arrows-rotate text-brandPurple text-sm group-hover:rotate-180 transition-transform duration-500"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="relative z-10 flex-grow max-w-6xl w-full mx-auto px-4 py-8 md:py-12 flex flex-col justify-center">
+        
+        <!-- ================= LANDING PAGE SECTION (FRIV GRID) ================= -->
+        <!-- Dummy menu-view to prevent JS ReferenceErrors in sudoku/app.js -->
+        <div id="menu-view" class="hidden"></div>
+
+        <!-- ================= SUDOKU GAMEPLAY SECTION ================= -->
+        <section id="game-view" class="view-transition hidden-fade w-full flex flex-col items-center max-w-4xl mx-auto">
+            
+            <!-- Game Bar Controls & Title -->
+            <div class="w-full flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-800 pb-5">
+                <div class="flex items-center gap-3">
+                    <button onclick="backToMenu()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-gray-800/80 border border-gray-700 hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </button>
+                    <div>
+                        <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                            Sudoku Master
+                        </h2>
+                        <p class="text-xs text-gray-400">Mainkan game logika favorit Anda</p>
+                    </div>
+                </div>
+
+                <!-- Info panel: Timer, Record, Difficulty Selector -->
+                <div class="grid grid-cols-2 md:flex md:flex-row md:items-center gap-2.5 w-full md:w-auto text-xs">
+                    <!-- Difficulty Selector -->
+                    <div class="col-span-1">
+                        <div class="flex items-center justify-between gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-300 shadow-inner h-[38px]">
+                            <span class="text-gray-400 text-[10px] font-bold uppercase tracking-wider">Tingkat:</span>
+                            <select id="difficulty-select" onchange="changeDifficulty()" class="bg-transparent text-white focus:outline-none font-extrabold text-xs cursor-pointer border-none p-0 outline-none">
+                                <option value="easy" class="bg-gray-800">Easy</option>
+                                <option value="medium" selected class="bg-gray-800">Medium</option>
+                                <option value="hard" class="bg-gray-800">Hard</option>
+                                <option value="expert" class="bg-gray-800">Expert</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Timer display -->
+                    <div class="col-span-1">
+                        <div class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 font-mono text-white text-xs font-bold shadow-inner h-[38px]">
+                            <i class="fa-solid fa-clock text-brandIndigo text-[10px]"></i>
+                            <span id="timer-display">00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Mistakes display -->
+                    <div class="col-span-1">
+                        <div class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-300 shadow-inner h-[38px]">
+                            <i class="fa-solid fa-circle-xmark text-rose-500 text-[10px]"></i>
+                            <span>Salah: <strong id="mistakes-display" class="text-rose-400">0/3</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Best Record display -->
+                    <div class="col-span-1">
+                        <div class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-300 shadow-inner h-[38px]">
+                            <i class="fa-solid fa-medal text-brandGold text-[10px]"></i>
+                            <span>Best: <strong id="best-time-display" class="text-white">-</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Multiplayer Connection Status Badge Wrapper -->
+                    <div class="col-span-2 md:col-span-1">
+                        <div id="connection-status-badge" class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold shadow-inner transition-colors duration-300 h-[38px] w-full bg-gray-800/80 border-gray-700 text-gray-400">
+                            <span id="connection-status-dot" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+                            <span id="connection-status-text">Mode Solo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sudoku Board, Controls & Numpad Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full items-start">
+                
+                <!-- COLUMN LEFT: Main 9x9 Sudoku Board Container -->
+                <div class="lg:col-span-7 flex flex-col items-center justify-center w-full max-w-md mx-auto">
+                    
+                    <!-- 9x9 Interactive Grid -->
+                    <div id="sudoku-board-container" class="w-full relative">
+                        <div id="sudoku-grid" class="sudoku-board w-full">
+                            <!-- JS will dynamically populate 81 cell elements here -->
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- COLUMN RIGHT: Sidebar Controls, Numpad & Actions -->
+                <div class="lg:col-span-5 flex flex-col gap-5 w-full max-w-md mx-auto">
+                    
+                    <!-- Action Toolbar Buttons -->
+                    <div class="grid grid-cols-3 gap-2.5">
+
+                        <!-- Notes Mode Toggle Button -->
+                        <button onclick="toggleNotesMode()" id="btn-notes" class="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-800/70 border border-gray-700/60 hover:bg-gray-700/80 hover:border-gray-600 transition group relative">
+                            <i class="fa-solid fa-pencil text-lg text-amber-400 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-gray-400 font-bold mt-1.5 uppercase">Notes</span>
+                            <!-- Active Indicator Dot -->
+                            <span id="notes-badge" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 hidden animate-ping"></span>
+                        </button>
+                        
+                        <!-- Hint Button -->
+                        <button onclick="handleHint()" id="btn-hint" class="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-800/70 border border-gray-700/60 hover:bg-gray-700/80 hover:border-gray-600 transition group">
+                            <i class="fa-solid fa-lightbulb text-lg text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-gray-400 font-bold mt-1.5 uppercase">Hint</span>
+                        </button>
+
+                        <!-- Erase Button (Hapus) -->
+                        <button onclick="eraseSelectedCell()" id="btn-erase" class="flex flex-col items-center justify-center p-3 rounded-xl bg-gray-800/70 border border-gray-700/60 hover:bg-gray-700/80 hover:border-gray-600 transition group">
+                            <i class="fa-solid fa-eraser text-lg text-rose-400 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-[10px] text-gray-400 font-bold mt-1.5 uppercase">Hapus</span>
+                        </button>
+
+                    </div>
+
+                    <!-- Virtual Numpad for Touch/Mobile Users -->
+                    <div class="glass-panel rounded-2xl p-4 border border-gray-800/80">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Numpad Virtual</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <button onclick="inputNumber(1)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">1</button>
+                            <button onclick="inputNumber(2)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">2</button>
+                            <button onclick="inputNumber(3)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">3</button>
+                            <button onclick="inputNumber(4)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">4</button>
+                            <button onclick="inputNumber(5)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">5</button>
+                            <button onclick="inputNumber(6)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">6</button>
+                            <button onclick="inputNumber(7)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">7</button>
+                            <button onclick="inputNumber(8)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">8</button>
+                            <button onclick="inputNumber(9)" class="h-14 font-black text-2xl rounded-xl bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 transition duration-150 active:scale-95 text-white flex items-center justify-center">9</button>
+                        </div>
+                    </div>
+
+                    <!-- Reset & New Game Panel -->
+                    <div class="flex items-center gap-3">
+                        <button id="btn-reset-board" onclick="resetBoard()" class="flex-1 py-3 text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl border border-gray-700/60 active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow">
+                            <i class="fa-solid fa-arrows-rotate"></i> Reset Game
+                        </button>
+                        <button onclick="initNewGame()" id="btn-new-game" class="flex-1 py-3 text-xs font-bold bg-gradient-to-r from-brandPurple to-brandIndigo hover:opacity-90 active:scale-[0.98] transition text-white rounded-xl shadow-lg shadow-brandPurple/20 flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Game Baru
+                        </button>
+                    </div>
+
+                    <!-- Multiplayer Room Panel -->
+                    <div class="glass-panel rounded-2xl p-4 border border-gray-800/80 flex flex-col gap-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-semibold text-gray-400 uppercase tracking-widest">Multiplayer Co-op</span>
+                            <span id="player-role-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded bg-brandPurple/20 text-brandPurple border border-brandPurple/30 uppercase tracking-wide">HOST</span>
+                        </div>
+
+                            <!-- Settings Co-op (Max Players Only) -->
+                            <div id="coop-settings-area" class="flex items-center justify-between gap-3 bg-slate-900/60 px-3.5 py-2.5 rounded-xl border border-gray-800/50 mb-1">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fa-solid fa-users text-brandPurple"></i> Maksimal Pemain:
+                                </span>
+                                <div class="bg-slate-950 border border-gray-800/80 px-2 py-1 rounded-lg flex items-center shadow-inner hover:border-brandPurple/40 transition duration-200">
+                                    <select id="coop-max-select" class="bg-transparent text-white font-extrabold text-[11px] focus:outline-none cursor-pointer border-none p-0 outline-none">
+                                        <option value="2" class="bg-gray-900">2 Pemain</option>
+                                        <option value="3" class="bg-gray-900">3 Pemain</option>
+                                        <option value="4" class="bg-gray-900">4 Pemain</option>
+                                        <option value="5" selected class="bg-gray-900">5 Pemain</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Host room button -->
+                            <button onclick="createMultiplayerRoom()" id="btn-create-room" class="w-full py-2.5 text-xs font-bold bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 text-white rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow">
+                                <i class="fa-solid fa-users text-brandPurple"></i> Buat Room Co-op
+                            </button>
+                            
+                            <!-- Join room input and button -->
+                            <div id="join-room-area" class="flex flex-col gap-1">
+                                <label for="room-code-input" class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Gabung Room Lain</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="room-code-input" placeholder="Masukkan Kode Room" class="flex-1 bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-brandPurple focus:outline-none transition font-semibold">
+                                    <button onclick="joinRoomByCode()" id="btn-join-room" class="px-3 py-1.5 bg-brandIndigo hover:bg-brandIndigo/90 rounded-lg text-xs font-bold text-white transition active:scale-95">Gabung</button>
+                                </div>
+                            </div>
+
+                            <!-- Info area when room is open (Host / Guest) -->
+                            <div id="room-info-area" class="hidden flex flex-col gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-gray-800">
+                                <p id="room-info-label" class="text-[10px] text-gray-400 leading-tight">Kode Room Anda:</p>
+                                <div class="flex gap-2">
+                                    <input type="text" id="share-link-input" readonly class="flex-1 bg-slate-950 border border-gray-800 text-[10px] rounded px-2 py-1 text-gray-300 font-bold focus:outline-none select-all text-center">
+                                    <button onclick="copyShareLink()" id="btn-copy-link" class="px-3 py-1 bg-brandPurple hover:bg-brandPurple/90 rounded text-[10px] font-bold text-white transition active:scale-95">Salin</button>
+                                </div>
+                                <!-- Share to Lobby Button -->
+                                <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="hidden w-full py-1.5 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Active Player List Area -->
+                        <div id="player-list-area" class="hidden flex flex-col gap-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-gray-800">
+                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Daftar Pemain</span>
+                            <div class="flex flex-col gap-1 text-[11px] text-gray-300 font-medium mb-1.5" id="player-list-container">
+                                <!-- JS will dynamically populate players list -->
+                            </div>
+                            <!-- Leave Room Button -->
+                            <button id="btn-leave-room" onclick="leaveOrDestroyRoom()" class="w-full py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Room
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-5 text-center text-xs text-gray-500 border-t border-gray-800/40 glass-panel bg-gray-900/10">
+        <p>&copy; 2026 Logicall Games.</p>
+    </footer>
+
+    <!-- ================= DIALOGS & OVERLAYS ================= -->
+
+    <!-- 1. COMING SOON MODAL -->
+    <div id="coming-soon-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div class="w-full max-w-sm glass-panel rounded-2xl p-6 border border-gray-800/80 transform scale-95 transition-all duration-300 shadow-2xl flex flex-col items-center text-center">
+            
+            <div class="w-16 h-16 rounded-full bg-brandPurple/10 border border-brandPurple/30 flex items-center justify-center mb-4">
+                <i class="fa-solid fa-hourglass-half text-2xl text-brandPurple animate-bounce"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-white mb-2 tracking-tight">Segera Hadir!</h3>
+            
+            <p class="text-xs text-gray-400 mb-6 leading-relaxed">
+                Terima kasih atas antusiasme Anda. Game <strong id="coming-soon-game-name" class="text-brandPurple font-bold">Tic Tac Toe</strong> sedang dalam proses pengembangan oleh tim kami. Tunggu pembaruan berikutnya!
+            </p>
+            
+            <button onclick="hideComingSoon()" class="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700/60 text-white font-bold text-xs tracking-wider transition uppercase shadow-md active:scale-98">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. GAME WINNER MODAL -->
+    <div id="win-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-3xl p-8 border border-brandPurple/30 transform scale-95 transition-all duration-300 shadow-2xl shadow-brandPurple/10 flex flex-col items-center text-center">
+            
+            <!-- Confetti / Winner Icon -->
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-brandGold to-yellow-300 flex items-center justify-center mb-5 shadow-lg shadow-brandGold/30 relative">
+                <i class="fa-solid fa-crown text-3xl text-gray-900 animate-pulse"></i>
+                <div class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center border-2 border-slate-900">
+                    <i class="fa-solid fa-check text-[10px] text-white"></i>
+                </div>
+            </div>
+            
+            <span class="text-xs text-brandGold font-extrabold uppercase tracking-widest block mb-1">Sudoku Terpecahkan!</span>
+            <h3 class="text-2xl md:text-3xl font-black text-white mb-6 tracking-tight">
+                Kerja Bagus, Juara!
+            </h3>
+            
+            <!-- Win Stats Card -->
+            <div class="grid grid-cols-2 gap-4 w-full mb-6">
+                <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-1">Kesulitan</span>
+                    <span id="win-difficulty" class="text-sm text-brandPurple font-black uppercase">MEDIUM</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block mb-1">Waktu Selesai</span>
+                    <span id="win-time" class="text-sm text-white font-mono font-extrabold">12:34</span>
+                </div>
+            </div>
+
+            <!-- Record Alert Banner -->
+            <div id="new-record-banner" class="w-full py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs mb-6 flex items-center justify-center gap-2 animate-bounce hidden">
+                <i class="fa-solid fa-award"></i> Rekor Baru Tercipta!
+            </div>
+            
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <button onclick="hideWinModal(); backToMenu();" class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700/60 text-white font-bold text-xs tracking-wider transition uppercase shadow-md active:scale-98">
+                    Menu Utama
+                </button>
+                <button onclick="requestNewGameFromModal();" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-brandPurple to-brandIndigo hover:opacity-95 text-white font-bold text-xs tracking-wider transition uppercase shadow-lg shadow-brandPurple/20 active:scale-98">
+                    Main Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.5. GAME OVER MODAL -->
+    <div id="game-over-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-3xl p-8 border border-rose-500/30 transform scale-95 transition-all duration-300 shadow-2xl shadow-rose-500/10 flex flex-col items-center text-center">
+            
+            <!-- Game Over Icon -->
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-rose-600 to-red-400 flex items-center justify-center mb-5 shadow-lg shadow-rose-600/30 relative">
+                <i class="fa-solid fa-skull-crossbones text-3xl text-white animate-pulse"></i>
+            </div>
+            
+            <span class="text-xs text-rose-400 font-extrabold uppercase tracking-widest block mb-1">Permainan Selesai</span>
+            <h3 class="text-2xl md:text-3xl font-black text-white mb-4 tracking-tight">
+                Kesempatan Habis!
+            </h3>
+            <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                Anda telah melakukan 3 kesalahan.
+            </p>
+            
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 w-full">
+                <button onclick="hideGameOverModal(); backToMenu();" class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700/60 text-white font-bold text-xs tracking-wider transition uppercase shadow-md active:scale-98">
+                    Menu Utama
+                </button>
+                <button id="btn-game-over-restart" onclick="requestNewGameFromModal();" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 hover:opacity-95 text-white font-bold text-xs tracking-wider transition uppercase shadow-lg shadow-rose-600/20 active:scale-98 disabled:opacity-50 disabled:pointer-events-none">
+                    Coba Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- Hidden Input for mobile keyboard trigger -->
+    <input type="text" id="mobile-input-trigger" inputmode="numeric" pattern="[1-9]*" class="absolute opacity-0 w-0 h-0 pointer-events-none">
+
+    <!-- JS Application Logic -->
+    <script src="app.js?v=1.7.0"></script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Bahasa Indonesia - Logicall</title>
+    <meta name="description" content="Mainkan game tebak kata Wordle versi Bahasa Indonesia dengan tampilan visual premium, lengkap dengan statistik dan petunjuk cara bermain.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css?v=1.6.1">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deep: '#0b0f17',
+                        slateCard: 'rgba(30, 41, 59, 0.4)',
+                        brandGreen: '#10b981',
+                        brandAmber: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-200">
+
+    <!-- Global Grid Background Effect -->
+    <div class="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Header Section -->
+    <header class="relative z-10 px-3 sm:px-6 py-3 sm:py-5 border-b border-gray-800/80 glass-panel bg-gray-900/40">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="backToMenu()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-600/30">
+                    <i class="fa-solid fa-gamepad text-base sm:text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white via-emerald-200 to-emerald-400">
+                        Logicall
+                    </h1>
+                    <p class="text-[8px] sm:text-[10px] tracking-widest text-emerald-400 font-semibold uppercase -mt-1">
+                        ARCADE PORTAL
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 sm:gap-4">
+                <!-- Username Input (Global) -->
+                <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/30">
+                    <i class="fa-solid fa-user text-emerald-400 text-[10px] sm:text-xs"></i>
+                    <input type="text" id="global-username-input" placeholder="Nama" maxlength="12" oninput="changeUsername(this.value)" class="bg-transparent border-none text-[10px] sm:text-xs text-white font-semibold focus:outline-none w-14 sm:w-28">
+                </div>
+
+                <!-- Refresh / Reload Page -->
+                <button onclick="window.location.reload(true)" title="Refresh Halaman" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/50 flex items-center justify-center transition-all duration-300 group">
+                    <i class="fa-solid fa-arrows-rotate text-emerald-400 text-sm group-hover:rotate-180 transition-transform duration-500"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Game Header Bar Controls (Aligned with Sudoku gameplay section header) -->
+    <section class="relative z-10 max-w-2xl w-full mx-auto px-4 mt-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800/80 pb-4">
+            <div class="flex items-center gap-3">
+                <button onclick="backToMenu()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-gray-800/80 border border-gray-700 hover:bg-gray-700 hover:text-white transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                </button>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        Wordle Indonesia
+                    </h2>
+                    <p class="text-xs text-gray-400">Tebak kata rahasia Bahasa Indonesia</p>
+                </div>
+            </div>
+
+            <!-- Stats/Badges inline to match Sudoku styling -->
+            <div class="flex items-center justify-between sm:justify-end gap-2.5 text-xs">
+                <!-- Connection Status Badge -->
+                <div id="connection-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs font-bold text-gray-400 shadow-inner h-[38px]">
+                    <span id="connection-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span id="connection-status-text">Mode Solo</span>
+                </div>
+                <!-- Restart button -->
+                <button onclick="confirmRestartGame()" title="Ulangi Permainan Baru" class="w-9 h-9 rounded-lg border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/40 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-arrow-rotate-right text-emerald-400 text-sm"></i>
+                </button>
+                <!-- Stats Trigger -->
+                <button onclick="toggleStatsModal(true)" title="Statistik Saya" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-chart-simple text-gray-400 hover:text-white text-sm"></i>
+                </button>
+                <!-- Help/About button -->
+                <button onclick="toggleHelpModal(true)" title="Cara Bermain" class="w-9 h-9 rounded-lg border border-gray-700/50 hover:bg-gray-800/50 flex items-center justify-center transition-all duration-300 shadow-inner h-[38px]">
+                    <i class="fa-solid fa-circle-info text-gray-400 hover:text-white text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multiplayer & Room Setup Panel (Lobi Versus Royale) -->
+    <section class="relative z-10 max-w-2xl w-full mx-auto px-4 mt-4">
+        <div class="glass-panel rounded-2xl p-4 border border-gray-800/80 flex flex-col gap-3">
+            <div class="flex justify-between items-center pb-2 border-b border-gray-800/50">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    Lobi Wordle Versus
+                </span>
+                <span id="player-role-badge" class="hidden text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">HOST</span>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-2.5 justify-between items-stretch" id="multiplayer-controls">
+                    <!-- Host/Create button -->
+                    <button onclick="createVersusRoom()" id="btn-create-room" class="w-full py-2.5 text-xs font-bold bg-slate-800/90 border border-gray-700 hover:bg-gray-700 hover:border-gray-600 text-white rounded-xl active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow">
+                        <i class="fa-solid fa-users text-emerald-400"></i> Buat Room
+                    </button>
+                    
+                    <!-- Join input & button -->
+                    <div id="join-room-area" class="flex flex-col gap-1">
+                        <label for="room-code-input" class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Gabung Room Lain</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="room-code-input" placeholder="Masukkan Kode Room" class="flex-1 bg-slate-900 border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 focus:outline-none transition font-semibold">
+                            <button onclick="joinVersusRoomByCode()" id="btn-join-room" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold text-white transition active:scale-95">Gabung</button>
+                        </div>
+                    </div>
+
+                    <!-- Info area when room is open (Host / Guest) -->
+                    <div id="room-info-area" class="hidden flex flex-col gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-gray-800">
+                        <p id="room-info-label" class="text-[10px] text-gray-400 leading-tight">Kode Room Anda:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="share-link-input" readonly class="flex-1 bg-slate-950 border border-gray-800 text-[10px] rounded px-2 py-1 text-gray-300 font-bold focus:outline-none select-all text-center">
+                            <button onclick="copyShareLink()" id="btn-copy-link" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95">Salin</button>
+                        </div>
+                        <div class="flex gap-2 mt-1">
+                            <!-- Share Room to Lobby -->
+                            <button onclick="shareRoomToLobby()" id="btn-share-lobby" class="hidden flex-1 py-2 bg-brandPurple/20 hover:bg-brandPurple/30 text-brandPurple border border-brandPurple/20 rounded text-[10px] font-bold transition active:scale-95 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-share-nodes"></i> Bagikan ke Lobby
+                            </button>
+                            <!-- Start Game Button (Host only) -->
+                            <button onclick="startVersusGame()" id="btn-start-versus" class="hidden flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] font-bold text-white transition active:scale-95">
+                                Mulai Game
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Players List Area -->
+                <div id="player-list-area" class="hidden flex flex-col gap-1.5 bg-slate-900/40 p-2.5 rounded-lg border border-gray-800">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider block mb-0.5">Daftar Pemain</span>
+                    <div class="flex flex-col gap-1 text-[11px] text-gray-300 font-medium mb-1.5" id="player-list-container">
+                        <!-- JS will dynamically populate players list -->
+                    </div>
+                    <button onclick="leaveVersusRoom()" id="btn-leave-room" class="w-full py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-[10px] font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Room
+                    </button>
+                </div>
+
+                <!-- Toggle Opponent Board Button for Mobile -->
+                <button id="btn-toggle-opponent-board" onclick="toggleOpponentBoardMobile()" class="hidden md:hidden w-full py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-gray-700 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-eye-slash"></i> Sembunyikan Papan Lawan
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main id="main-container" class="relative z-10 flex-grow w-full max-w-2xl mx-auto px-4 py-4 sm:py-6 flex flex-col justify-center gap-4 sm:gap-6 transition-all duration-300">
+        
+        <div id="boards-wrapper" class="flex flex-col md:flex-row justify-center items-center gap-6 w-full">
+            
+            <!-- Papan Lokal (Pemain 1) -->
+            <div class="flex flex-col items-center gap-2 w-full max-w-[330px]">
+                <span id="my-board-title" class="hidden text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Papan Saya</span>
+                <!-- Papan Game Wordle (6x5 Grid) -->
+                <div id="wordle-board" class="wordle-grid">
+                    <!-- Row 1 -->
+                    <div class="grid-row" id="row-0">
+                        <div class="grid-cell" id="cell-0-0"></div>
+                        <div class="grid-cell" id="cell-0-1"></div>
+                        <div class="grid-cell" id="cell-0-2"></div>
+                        <div class="grid-cell" id="cell-0-3"></div>
+                        <div class="grid-cell" id="cell-0-4"></div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="grid-row" id="row-1">
+                        <div class="grid-cell" id="cell-1-0"></div>
+                        <div class="grid-cell" id="cell-1-1"></div>
+                        <div class="grid-cell" id="cell-1-2"></div>
+                        <div class="grid-cell" id="cell-1-3"></div>
+                        <div class="grid-cell" id="cell-1-4"></div>
+                    </div>
+                    <!-- Row 3 -->
+                    <div class="grid-row" id="row-2">
+                        <div class="grid-cell" id="cell-2-0"></div>
+                        <div class="grid-cell" id="cell-2-1"></div>
+                        <div class="grid-cell" id="cell-2-2"></div>
+                        <div class="grid-cell" id="cell-2-3"></div>
+                        <div class="grid-cell" id="cell-2-4"></div>
+                    </div>
+                    <!-- Row 4 -->
+                    <div class="grid-row" id="row-3">
+                        <div class="grid-cell" id="cell-3-0"></div>
+                        <div class="grid-cell" id="cell-3-1"></div>
+                        <div class="grid-cell" id="cell-3-2"></div>
+                        <div class="grid-cell" id="cell-3-3"></div>
+                        <div class="grid-cell" id="cell-3-4"></div>
+                    </div>
+                    <!-- Row 5 -->
+                    <div class="grid-row" id="row-4">
+                        <div class="grid-cell" id="cell-4-0"></div>
+                        <div class="grid-cell" id="cell-4-1"></div>
+                        <div class="grid-cell" id="cell-4-2"></div>
+                        <div class="grid-cell" id="cell-4-3"></div>
+                        <div class="grid-cell" id="cell-4-4"></div>
+                    </div>
+                    <!-- Row 6 -->
+                    <div class="grid-row" id="row-5">
+                        <div class="grid-cell" id="cell-5-0"></div>
+                        <div class="grid-cell" id="cell-5-1"></div>
+                        <div class="grid-cell" id="cell-5-2"></div>
+                        <div class="grid-cell" id="cell-5-3"></div>
+                        <div class="grid-cell" id="cell-5-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Papan Lawan (Pemain 2) - Hanya Terlihat di Mode Multiplayer -->
+            <div id="opponent-board-wrapper" class="hidden flex-col items-center gap-2 w-full max-w-[330px] relative">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Papan Lawan</span>
+                <div id="wordle-board-opponent" class="wordle-grid opacity-30 select-none">
+                    <!-- Row 0 -->
+                    <div class="grid-row" id="opp-row-0">
+                        <div class="grid-cell" id="opp-cell-0-0"></div>
+                        <div class="grid-cell" id="opp-cell-0-1"></div>
+                        <div class="grid-cell" id="opp-cell-0-2"></div>
+                        <div class="grid-cell" id="opp-cell-0-3"></div>
+                        <div class="grid-cell" id="opp-cell-0-4"></div>
+                    </div>
+                    <!-- Row 1 -->
+                    <div class="grid-row" id="opp-row-1">
+                        <div class="grid-cell" id="opp-cell-1-0"></div>
+                        <div class="grid-cell" id="opp-cell-1-1"></div>
+                        <div class="grid-cell" id="opp-cell-1-2"></div>
+                        <div class="grid-cell" id="opp-cell-1-3"></div>
+                        <div class="grid-cell" id="opp-cell-1-4"></div>
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="grid-row" id="opp-row-2">
+                        <div class="grid-cell" id="opp-cell-2-0"></div>
+                        <div class="grid-cell" id="opp-cell-2-1"></div>
+                        <div class="grid-cell" id="opp-cell-2-2"></div>
+                        <div class="grid-cell" id="opp-cell-2-3"></div>
+                        <div class="grid-cell" id="opp-cell-2-4"></div>
+                    </div>
+                    <!-- Row 3 -->
+                    <div class="grid-row" id="opp-row-3">
+                        <div class="grid-cell" id="opp-cell-3-0"></div>
+                        <div class="grid-cell" id="opp-cell-3-1"></div>
+                        <div class="grid-cell" id="opp-cell-3-2"></div>
+                        <div class="grid-cell" id="opp-cell-3-3"></div>
+                        <div class="grid-cell" id="opp-cell-3-4"></div>
+                    </div>
+                    <!-- Row 4 -->
+                    <div class="grid-row" id="opp-row-4">
+                        <div class="grid-cell" id="opp-cell-4-0"></div>
+                        <div class="grid-cell" id="opp-cell-4-1"></div>
+                        <div class="grid-cell" id="opp-cell-4-2"></div>
+                        <div class="grid-cell" id="opp-cell-4-3"></div>
+                        <div class="grid-cell" id="opp-cell-4-4"></div>
+                    </div>
+                    <!-- Row 5 -->
+                    <div class="grid-row" id="opp-row-5">
+                        <div class="grid-cell" id="opp-cell-5-0"></div>
+                        <div class="grid-cell" id="opp-cell-5-1"></div>
+                        <div class="grid-cell" id="opp-cell-5-2"></div>
+                        <div class="grid-cell" id="opp-cell-5-3"></div>
+                        <div class="grid-cell" id="opp-cell-5-4"></div>
+                    </div>
+                </div>
+
+                <!-- Opponent Mask Cover (Hides opponent's letters until finished) -->
+                <div id="opponent-mask" class="absolute inset-0 top-[24px] rounded-xl glass-panel border border-gray-800/80 flex flex-col items-center justify-center text-center p-4 z-20 backdrop-blur-md">
+                    <div class="w-10 h-10 rounded-full bg-slate-800/50 border border-gray-700/30 flex items-center justify-center mb-3 animate-pulse">
+                        <i class="fa-solid fa-lock text-gray-500 text-sm"></i>
+                    </div>
+                    <span class="text-[11px] font-bold text-gray-300 block mb-1">Papan Terkunci</span>
+                    <p id="opponent-status-text" class="text-[9px] text-gray-500 max-w-[200px] leading-relaxed">Menunggu lawan memulai...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Keyboard Virtual -->
+        <div class="keyboard" id="keyboard-container">
+            <!-- Row 1 -->
+            <div class="keyboard-row">
+                <button class="key-btn" data-key="Q">q</button>
+                <button class="key-btn" data-key="W">w</button>
+                <button class="key-btn" data-key="E">e</button>
+                <button class="key-btn" data-key="R">r</button>
+                <button class="key-btn" data-key="T">t</button>
+                <button class="key-btn" data-key="Y">y</button>
+                <button class="key-btn" data-key="U">u</button>
+                <button class="key-btn" data-key="I">i</button>
+                <button class="key-btn" data-key="O">o</button>
+                <button class="key-btn" data-key="P">p</button>
+            </div>
+            <!-- Row 2 -->
+            <div class="keyboard-row">
+                <div class="w-[2%]"></div> <!-- Spacer -->
+                <button class="key-btn" data-key="A">a</button>
+                <button class="key-btn" data-key="S">s</button>
+                <button class="key-btn" data-key="D">d</button>
+                <button class="key-btn" data-key="F">f</button>
+                <button class="key-btn" data-key="G">g</button>
+                <button class="key-btn" data-key="H">h</button>
+                <button class="key-btn" data-key="J">j</button>
+                <button class="key-btn" data-key="K">k</button>
+                <button class="key-btn" data-key="L">l</button>
+                <div class="w-[2%]"></div> <!-- Spacer -->
+            </div>
+            <!-- Row 3 -->
+            <div class="keyboard-row">
+                <button class="key-btn wide" data-key="ENTER">Enter</button>
+                <button class="key-btn" data-key="Z">z</button>
+                <button class="key-btn" data-key="X">x</button>
+                <button class="key-btn" data-key="C">c</button>
+                <button class="key-btn" data-key="V">v</button>
+                <button class="key-btn" data-key="B">b</button>
+                <button class="key-btn" data-key="N">n</button>
+                <button class="key-btn" data-key="M">m</button>
+                <button class="key-btn wide" data-key="BACKSPACE">
+                    <i class="fa-solid fa-delete-left text-sm sm:text-base"></i>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-5 text-center text-xs text-gray-500 border-t border-gray-800/40 glass-panel bg-gray-900/10">
+        <p>&copy; 2026 Logicall Wordle.</p>
+    </footer>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. CARA BERMAIN MODAL (HELP) -->
+    <div id="help-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-2xl p-6 border border-gray-800/80 shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-emerald-400"></i> Cara Bermain
+                </h3>
+                <button onclick="toggleHelpModal(false)" class="text-gray-500 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="text-xs text-gray-400 space-y-4 leading-relaxed overflow-y-auto pr-1">
+                <p>Tebak kata rahasia dalam 6 kali percobaan.</p>
+                <ul class="list-disc list-inside space-y-1 pl-1">
+                    <li>Setiap tebakan harus berupa kata 5 huruf yang valid dalam kamus.</li>
+                    <li>Warna kotak akan berubah untuk menunjukkan seberapa dekat tebakan Anda.</li>
+                </ul>
+
+                <hr class="border-gray-800">
+
+                <div>
+                    <h4 class="font-bold text-gray-200 mb-2">Contoh Petunjuk Warna:</h4>
+                    
+                    <!-- Contoh 1: Correct -->
+                    <div class="flex flex-col gap-1.5 mb-3">
+                        <div class="flex gap-1.5">
+                            <div class="w-8 h-8 rounded bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm uppercase">M</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">A</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">S</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">U</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">K</div>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Huruf <strong class="text-emerald-400">M</strong> berada di dalam kata rahasia dan posisinya sudah benar.</p>
+                    </div>
+
+                    <!-- Contoh 2: Present -->
+                    <div class="flex flex-col gap-1.5 mb-3">
+                        <div class="flex gap-1.5">
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">R</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">U</div>
+                            <div class="w-8 h-8 rounded bg-amber-500 flex items-center justify-center text-white font-extrabold text-sm uppercase">M</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">A</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">H</div>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Huruf <strong class="text-amber-400">M</strong> berada di dalam kata rahasia tetapi letak posisinya salah.</p>
+                    </div>
+
+                    <!-- Contoh 3: Absent -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex gap-1.5">
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">P</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">I</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">N</div>
+                            <div class="w-8 h-8 rounded bg-gray-700 flex items-center justify-center text-gray-500 font-extrabold text-sm uppercase">T</div>
+                            <div class="w-8 h-8 rounded border border-gray-700 flex items-center justify-center text-gray-400 font-extrabold text-sm uppercase">U</div>
+                        </div>
+                        <p class="text-[10px] text-gray-400">Huruf <strong class="text-gray-400">T</strong> tidak ada sama sekali di dalam kata rahasia.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="toggleHelpModal(false)" class="w-full mt-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs tracking-wider transition uppercase shadow-md">
+                Mengerti & Main
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. STATISTIK MODAL (WIN/LOSE DISPLAY) -->
+    <div id="stats-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-all duration-300">
+        <div class="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-2xl flex flex-col items-center text-center">
+            
+            <!-- Result Title -->
+            <div id="stats-title-area" class="mb-4">
+                <span id="game-status-badge" class="text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest block w-max mx-auto mb-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">STATISTIK</span>
+                <h3 id="stats-main-title" class="text-2xl font-black text-white tracking-tight">Statistik Permainan</h3>
+            </div>
+
+            <!-- Stats Block -->
+            <div class="grid grid-cols-4 gap-2 w-full mb-6 text-center">
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-played" class="text-base sm:text-lg font-black text-white">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Main</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-win-rate" class="text-base sm:text-lg font-black text-emerald-400">0%</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Menang</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-streak" class="text-base sm:text-lg font-black text-amber-400">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Streak</span>
+                </div>
+                <div class="p-2 sm:p-3 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                    <span id="stat-max-streak" class="text-base sm:text-lg font-black text-white">0</span>
+                    <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider block">Max Strk</span>
+                </div>
+            </div>
+
+            <!-- Answer display (shown only on game finished) -->
+            <div id="answer-reveal-area" class="hidden w-full p-3 rounded-xl bg-slate-900 border border-gray-800 mb-6">
+                <span class="text-[9px] font-bold uppercase text-gray-500 tracking-wider">Kata Rahasia Adalah</span>
+                <h4 id="revealed-secret-word" class="text-xl font-black tracking-widest text-emerald-400 uppercase mt-0.5">MAKAN</h4>
+            </div>
+
+            <!-- Distribution Chart -->
+            <div class="w-full mb-6 text-left">
+                <span class="text-[9px] font-bold uppercase text-gray-400 tracking-widest block mb-2">Distribusi Tebakan</span>
+                <div class="space-y-1.5" id="guess-dist-container">
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">1</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-1" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">2</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-2" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">3</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-3" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">4</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-4" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">5</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-5" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="w-2 text-gray-400 font-bold">6</span>
+                        <div class="flex-grow bg-gray-800 rounded h-4 overflow-hidden">
+                            <div id="dist-bar-6" class="bg-gray-600 text-[10px] text-white font-extrabold flex items-center justify-end pr-1.5 transition-all duration-500 h-full w-[0%]">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 w-full">
+                <button id="btn-stats-left" onclick="handleStatsLeftClick()" class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-bold text-xs tracking-wider transition uppercase active:scale-98">
+                    Tutup
+                </button>
+                <button id="btn-restart-game" onclick="restartGame()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-white font-bold text-xs tracking-wider transition uppercase shadow-lg shadow-emerald-500/20 active:scale-98">
+                    Main Lagi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js?v=1.6.1"></script>
+</body>
+</html>
